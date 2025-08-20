@@ -1,0 +1,1009 @@
+{
+  "info": {
+    "name": "Laravel API v1 Collection",
+    "_postman_id": "00000000-0000-0000-0000-000000000000",
+    "description": "Postman collection to test the Laravel API v1 endpoints.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "type": "string",
+        "value": "{{auth_token}}"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost",
+      "type": "string"
+    },
+    {
+      "key": "api_prefix",
+      "value": "/api/v1",
+      "type": "string"
+    },
+    {
+      "key": "auth_token",
+      "value": "<PASTE_YOUR_TOKEN_HERE>",
+      "type": "string"
+    },
+    {
+      "key": "city_id",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "zone_id",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "location_id",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "service_feature_id",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "vehicle_type_id",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "rate_id",
+      "value": "1",
+      "type": "string"
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Ensure Authorization header is present if auth_token is set",
+          "if (pm.collectionVariables.get('auth_token')) {",
+          "  pm.request.removeHeader('Authorization');",
+          "  pm.request.addHeader({ key: 'Authorization', value: 'Bearer ' + pm.collectionVariables.get('auth_token') });",
+          "}"
+        ]
+      }
+    }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Get Current User (Sanctum protected)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/user",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "user"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200 or 401', function () {",
+                  "  pm.expect([200, 401]).to.include(pm.response.code);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Autocomplete",
+      "item": [
+        {
+          "name": "GET /autocomplete?query=",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}{{api_prefix}}/autocomplete?query={{query}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "{{api_prefix}}",
+                "autocomplete"
+              ],
+              "query": [
+                {
+                  "key": "query",
+                  "value": "air",
+                  "description": "Search text"
+                }
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', function () { pm.response.to.have.status(200); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Quotes",
+      "item": [
+        {
+          "name": "GET /quote",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}{{api_prefix}}/quote?from={{from}}&to={{to}}&date={{date}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "{{api_prefix}}",
+                "quote"
+              ],
+              "query": [
+                {
+                  "key": "from",
+                  "value": "LOC-001"
+                },
+                {
+                  "key": "to",
+                  "value": "LOC-002"
+                },
+                {
+                  "key": "date",
+                  "value": "2025-12-31T10:00:00Z"
+                }
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200 or 422', function () {",
+                  "  pm.expect([200, 422]).to.include(pm.response.code);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Cities",
+      "item": [
+        {
+          "name": "List Cities (paginated, filters)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}{{api_prefix}}/cities?search={{search}}&country={{country}}&state={{state}}&sort_by=name&sort_order=asc&per_page=10",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "{{api_prefix}}",
+                "cities"
+              ],
+              "query": [
+                { "key": "search", "value": "York" },
+                { "key": "country", "value": "" },
+                { "key": "state", "value": "" },
+                { "key": "sort_by", "value": "name" },
+                { "key": "sort_order", "value": "asc" },
+                { "key": "per_page", "value": "10" }
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Has pagination structure', function () {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json).to.have.property('data');",
+                  "  pm.expect(json).to.have.property('message');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create City",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Sample City\",\n  \"state\": \"Sample State\",\n  \"country\": \"Sample Country\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}{{api_prefix}}/cities",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "{{api_prefix}}",
+                "cities"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Created 201 or 422', function () {",
+                  "  pm.expect([201, 422]).to.include(pm.response.code);",
+                  "});",
+                  "if (pm.response.code === 201) {",
+                  "  const id = pm.response.json()?.data?.city?.id;",
+                  "  if (id) {",
+                  "    pm.collectionVariables.set('city_id', id);",
+                  "  }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Show City",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}{{api_prefix}}/cities/{{city_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "{{api_prefix}}",
+                "cities",
+                "{{city_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update City",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated City\",\n  \"state\": \"Updated State\",\n  \"country\": \"Updated Country\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}{{api_prefix}}/cities/{{city_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "{{api_prefix}}",
+                "cities",
+                "{{city_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete City",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{base_url}}{{api_prefix}}/cities/{{city_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "{{api_prefix}}",
+                "cities",
+                "{{city_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "City Details",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}{{api_prefix}}/cities/{{city_id}}/details",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "{{api_prefix}}",
+                "cities",
+                "{{city_id}}",
+                "details"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Zones",
+      "item": [
+        {
+          "name": "List Zones (active)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}{{api_prefix}}/zones",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "{{api_prefix}}",
+                "zones"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Zone",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Downtown\",\n  \"city_id\": {{city_id}},\n  \"active\": true,\n  \"description\": \"Central business district\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}{{api_prefix}}/zones",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "{{api_prefix}}",
+                "zones"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('201 or 422', function () {",
+                  "  pm.expect([201, 200, 422]).to.include(pm.response.code);",
+                  "});",
+                  "try {",
+                  "  const id = pm.response.json()?.data?.id || pm.response.json()?.id;",
+                  "  if (id) pm.collectionVariables.set('zone_id', id);",
+                  "} catch (e) {}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Show Zone",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}{{api_prefix}}/zones/{{zone_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "{{api_prefix}}",
+                "zones",
+                "{{zone_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Zone",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Downtown Updated\",\n  \"active\": true\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}{{api_prefix}}/zones/{{zone_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "{{api_prefix}}",
+                "zones",
+                "{{zone_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Zone",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{base_url}}{{api_prefix}}/zones/{{zone_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "{{api_prefix}}",
+                "zones",
+                "{{zone_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "List Zones by City",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}{{api_prefix}}/cities/{{city_id}}/zones",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "{{api_prefix}}",
+                "cities",
+                "{{city_id}}",
+                "zones"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Locations",
+      "item": [
+        {
+          "name": "List Locations (active)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}{{api_prefix}}/locations",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "{{api_prefix}}",
+                "locations"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Location",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Central Station\",\n  \"city_id\": {{city_id}},\n  \"type\": \"train\",\n  \"active\": true,\n  \"description\": \"Main train station\",\n  \"latitude\": 40.7128,\n  \"longitude\": -74.0060\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}{{api_prefix}}/locations",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "{{api_prefix}}",
+                "locations"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('201 or 422', function () {",
+                  "  pm.expect([201, 200, 422]).to.include(pm.response.code);",
+                  "});",
+                  "try {",
+                  "  const id = pm.response.json()?.data?.id || pm.response.json()?.id;",
+                  "  if (id) pm.collectionVariables.set('location_id', id);",
+                  "} catch (e) {}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Show Location",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}{{api_prefix}}/locations/{{location_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "{{api_prefix}}",
+                "locations",
+                "{{location_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Location",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Central Station Updated\",\n  \"type\": \"train\",\n  \"active\": true\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}{{api_prefix}}/locations/{{location_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "{{api_prefix}}",
+                "locations",
+                "{{location_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Location",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{base_url}}{{api_prefix}}/locations/{{location_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "{{api_prefix}}",
+                "locations",
+                "{{location_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "List Locations by City",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}{{api_prefix}}/cities/{{city_id}}/locations",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "{{api_prefix}}",
+                "cities",
+                "{{city_id}}",
+                "locations"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "List Locations by Type",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}{{api_prefix}}/locations/type/{{type}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "{{api_prefix}}",
+                "locations",
+                "type",
+                "{{type}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "key": "type",
+                  "value": "train"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Service Features",
+      "item": [
+        {
+          "name": "List Service Features",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}{{api_prefix}}/service-features",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "{{api_prefix}}",
+                "service-features"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Service Feature",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"WiFi\",\n  \"description\": \"On-board WiFi\",\n  \"active\": true\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}{{api_prefix}}/service-features",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "{{api_prefix}}",
+                "service-features"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Show Service Feature",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}{{api_prefix}}/service-features/{{service_feature_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "{{api_prefix}}",
+                "service-features",
+                "{{service_feature_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Service Feature",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"WiFi Updated\",\n  \"active\": true\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}{{api_prefix}}/service-features/{{service_feature_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "{{api_prefix}}",
+                "service-features",
+                "{{service_feature_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Service Feature",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{base_url}}{{api_prefix}}/service-features/{{service_feature_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "{{api_prefix}}",
+                "service-features",
+                "{{service_feature_id}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Vehicle Types",
+      "item": [
+        {
+          "name": "List Vehicle Types",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}{{api_prefix}}/vehicle-types",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "{{api_prefix}}",
+                "vehicle-types"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Vehicle Type",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Sedan\",\n  \"description\": \"Standard sedan\",\n  \"active\": true\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}{{api_prefix}}/vehicle-types",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "{{api_prefix}}",
+                "vehicle-types"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Show Vehicle Type",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}{{api_prefix}}/vehicle-types/{{vehicle_type_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "{{api_prefix}}",
+                "vehicle-types",
+                "{{vehicle_type_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Vehicle Type",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Sedan Updated\",\n  \"active\": true\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}{{api_prefix}}/vehicle-types/{{vehicle_type_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "{{api_prefix}}",
+                "vehicle-types",
+                "{{vehicle_type_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Vehicle Type",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{base_url}}{{api_prefix}}/vehicle-types/{{vehicle_type_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "{{api_prefix}}",
+                "vehicle-types",
+                "{{vehicle_type_id}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Rates",
+      "item": [
+        {
+          "name": "List Rates",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}{{api_prefix}}/rates",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "{{api_prefix}}",
+                "rates"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Rate",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Standard City Rate\",\n  \"amount\": 49.99,\n  \"currency\": \"USD\",\n  \"active\": true\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}{{api_prefix}}/rates",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "{{api_prefix}}",
+                "rates"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Show Rate",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}{{api_prefix}}/rates/{{rate_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "{{api_prefix}}",
+                "rates",
+                "{{rate_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Rate",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Standard City Rate Updated\",\n  \"amount\": 55.00,\n  \"active\": true\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}{{api_prefix}}/rates/{{rate_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "{{api_prefix}}",
+                "rates",
+                "{{rate_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Rate",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{base_url}}{{api_prefix}}/rates/{{rate_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "{{api_prefix}}",
+                "rates",
+                "{{rate_id}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
