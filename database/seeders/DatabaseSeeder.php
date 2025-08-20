@@ -19,5 +19,17 @@ class DatabaseSeeder extends Seeder
             'name' => 'Test User',
             'email' => 'test@example.com',
         ]);
+
+        // Seed our location data
+        $this->call([
+            CitySeeder::class,
+            ZoneSeeder::class,
+            AirportSeeder::class,
+            LocationSeeder::class,
+            ServiceTypeSeeder::class,
+            ServiceFeatureSeeder::class, // Debe ejecutarse antes de VehicleTypeSeeder
+            VehicleTypeSeeder::class,
+            RateSeeder::class, // Debe ejecutarse después de tener ubicaciones, servicios y vehículos
+        ]);
     }
 }
