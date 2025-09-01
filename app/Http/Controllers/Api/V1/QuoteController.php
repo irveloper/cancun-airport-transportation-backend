@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Api\V1\BaseApiController;
+use App\Http\Requests\Api\V1\QuoteRequest;
 use App\Http\Resources\QuoteResource;
 use App\Models\ServiceType;
 use App\Models\VehicleType;
@@ -15,48 +16,70 @@ use Exception;
 
 class QuoteController extends BaseApiController
 {
-    public function getQuote(Request $request): JsonResponse
+    public function getQuote(QuoteRequest $request): JsonResponse
     {
         try {
-            $validated = $request->validate([
-                'service_type' => 'required|string', // round-trip, one-way, hotel-to-hotel
-                'from_location_id' => 'required|integer|exists:locations,id',
-                'to_location_id' => 'required|integer|exists:locations,id',
-                'pax' => 'required|integer|min:1|max:50',
-                'date' => 'nullable|date|after_or_equal:today',
-            ]);
+            // Input is already validated by QuoteRequest
+            $validated = $request->validated();
 
+            // Create cache key for this quote request
+            $cacheKey = $this->generateQuoteCacheKey($validated);
+            
+            // Try to get cached quote first
+            return $this->getCachedData($cacheKey, function () use ($validated, $request) {
+                return $this->generateQuote($validated, $request);
+            }, 900); // Cache for 15 minutes
+
+        } catch (Exception $e) {
+            $this->logError('Failed to get quote', $e, $request->all());
+            return $this->resourceErrorResponse('quote', 'invalid_parameters', 500);
+        }
+    }
+
+    /**
+     * Generate quote with performance monitoring
+     */
+    private function generateQuote(array $validated, Request $request): JsonResponse
+    {
+        return $this->monitorQueryPerformance(function () use ($validated, $request) {
             // Buscar el tipo de servicio
             $serviceTypeCode = $this->mapServiceTypeCode($validated['service_type']);
-            $serviceType = ServiceType::where('code', $serviceTypeCode)
-                                    ->orWhere('name', 'like', '%' . $validated['service_type'] . '%')
-                                    ->first();
+            $serviceType = $this->getCachedData("service_type:{$serviceTypeCode}", function () use ($serviceTypeCode, $validated) {
+                return ServiceType::where('code', $serviceTypeCode)
+                                ->orWhere('name', 'like', '%' . $validated['service_type'] . '%')
+                                ->first();
+            }, 3600); // Cache for 1 hour
 
             if (!$serviceType) {
-                return $this->errorResponse('Service type not found', 404);
+                return $this->resourceErrorResponse('quote', 'not_found', 404);
             }
 
-            // Obtener las ubicaciones
-            $fromLocation = Location::with(['zone.city'])->find($validated['from_location_id']);
-            $toLocation = Location::with(['zone.city'])->find($validated['to_location_id']);
+            // Obtener las ubicaciones con sus zonas y ciudades
+            $fromLocation = $this->getCachedData("location:{$validated['from_location_id']}", function () use ($validated) {
+                return Location::with(['zone.city'])->find($validated['from_location_id']);
+            }, 3600);
+
+            $toLocation = $this->getCachedData("location:{$validated['to_location_id']}", function () use ($validated) {
+                return Location::with(['zone.city'])->find($validated['to_location_id']);
+            }, 3600);
 
             if (!$fromLocation || !$toLocation) {
-                return $this->errorResponse('Location not found', 404);
+                return $this->resourceErrorResponse('location', 'not_found', 404);
             }
 
             // Determinar el serviceTypeTPV basado en el tipo de ubicación
             $serviceTypeTPV = $this->determineServiceTypeTPV($fromLocation, $toLocation, $serviceType);
 
-            // Buscar rates disponibles para esta ruta
-            $rates = Rate::with(['vehicleType.serviceFeatures'])
-                        ->where('service_type_id', $serviceType->id)
-                        ->where('from_location_id', $validated['from_location_id'])
-                        ->where('to_location_id', $validated['to_location_id'])
-                        ->valid($validated['date'] ?? now())
-                        ->get();
+            // Buscar rates disponibles usando el nuevo sistema zone-based
+            $rates = Rate::findForRoute(
+                $serviceType->id,
+                $validated['from_location_id'],
+                $validated['to_location_id'],
+                $validated['date'] ?? now()
+            );
 
             if ($rates->isEmpty()) {
-                return $this->errorResponse('No rates available for this route', 404);
+                return $this->resourceErrorResponse('quote', 'rate_not_available', 404);
             }
 
             // Filtrar por capacidad de pasajeros
@@ -65,7 +88,7 @@ class QuoteController extends BaseApiController
             });
 
             if ($availableRates->isEmpty()) {
-                return $this->errorResponse('No vehicles available for the requested number of passengers', 404);
+                return $this->errorResponse(__('api.business.no_available_vehicles'), 404);
             }
 
             // Construir la respuesta
@@ -108,29 +131,32 @@ class QuoteController extends BaseApiController
                     'name' => $vehicleType->name,
                     'pic' => $vehicleType->image,
                     'type' => $vehicleType->code,
-                    'features' => $features, // Nueva estructura de features
+                    'features' => $features,
                     'mUnits' => $vehicleType->max_units,
                     'mPax' => $vehicleType->max_pax,
                     'timeFromAirport' => $vehicleType->travel_time,
                     'video' => $vehicleType->video_url,
                     'frame' => $vehicleType->frame,
                     'numVehicles' => $rate->num_vehicles,
-                    'costVehicleOW' => number_format($rate->cost_vehicle_one_way, 2, '.', ''),
+                    'costVehicleOW' => $rate->getFormattedPrice('one_way'),
                     'totalOW' => (int) $rate->total_one_way,
-                    'costVehicleRT' => number_format($rate->cost_vehicle_round_trip, 2, '.', ''),
+                    'costVehicleRT' => $rate->getFormattedPrice('round_trip'),
                     'totalRT' => (int) $rate->total_round_trip,
                     'available' => $rate->available ? 1 : 0
                 ];
             }
 
-            return $this->successResponse($response, 'Quote retrieved successfully');
+            return $this->resourceResponse('quote', 'calculated', $response);
+        }, 'quote_generation');
+    }
 
-        } catch (ValidationException $e) {
-            return $this->validationErrorResponse($e);
-        } catch (Exception $e) {
-            $this->logError('Failed to get quote', $e, $request->all());
-            return $this->errorResponse('Failed to get quote', 500);
-        }
+    /**
+     * Generate cache key for quote requests
+     */
+    private function generateQuoteCacheKey(array $validated): string
+    {
+        $date = $validated['date'] ?? now()->format('Y-m-d');
+        return "quote:{$validated['service_type']}:{$validated['from_location_id']}:{$validated['to_location_id']}:{$validated['pax']}:{$date}";
     }
 
     /**
@@ -159,6 +185,8 @@ class QuoteController extends BaseApiController
             'one-way' => 'OW',
             'one way' => 'OW',
             'oneway' => 'OW',
+            'arrival' => 'OW', // Airport arrival uses one-way rates
+            'departure' => 'OW', // Airport departure uses one-way rates
             'hotel-to-hotel' => 'HTH',
             'hotel to hotel' => 'HTH',
             'hotel_to_hotel' => 'HTH',
