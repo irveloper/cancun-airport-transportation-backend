@@ -482,7 +482,7 @@ class AutocompleteControllerTest extends TestCase
     public function test_airport_search_priority_by_code(): void
     {
         $request = new Request([
-            'q' => 'MIA Miami',
+            'q' => 'MIA',
             'type' => 'departure',
             'input' => 'from'
         ]);

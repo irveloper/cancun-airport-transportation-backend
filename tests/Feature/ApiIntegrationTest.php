@@ -35,13 +35,15 @@ class ApiIntegrationTest extends TestCase
         $serviceType = ServiceType::create([
             'name' => 'Airport Transfer',
             'code' => 'airport',
+            'tpv_type' => 'service_airport',
             'active' => true
         ]);
 
         $vehicleType = VehicleType::create([
             'name' => 'Sedan',
             'code' => 'sedan',
-            'capacity' => 4,
+            'max_pax' => 4,
+            'max_units' => 10,
             'active' => true
         ]);
 

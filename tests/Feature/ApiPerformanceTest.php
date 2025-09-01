@@ -42,6 +42,7 @@ class ApiPerformanceTest extends TestCase
             $serviceTypes[] = ServiceType::create([
                 'name' => ucfirst($type) . ' Transfer',
                 'code' => $type,
+                'tpv_type' => 'service_' . $type,
                 'active' => true
             ]);
         }
@@ -52,7 +53,8 @@ class ApiPerformanceTest extends TestCase
             $vehicleTypes[] = VehicleType::create([
                 'name' => ucfirst($type),
                 'code' => $type,
-                'capacity' => $type === 'sedan' ? 4 : ($type === 'suv' ? 6 : 8),
+                'max_pax' => $type === 'sedan' ? 4 : ($type === 'suv' ? 6 : 8),
+                'max_units' => 10,
                 'active' => true
             ]);
         }

@@ -41,13 +41,15 @@ class RateModelTest extends TestCase
         $this->serviceType = ServiceType::create([
             'name' => 'Airport Transfer',
             'code' => 'airport',
+            'tpv_type' => 'service_airport',
             'active' => true
         ]);
 
         $this->vehicleType = VehicleType::create([
             'name' => 'Sedan',
             'code' => 'sedan',
-            'capacity' => 4,
+            'max_pax' => 4,
+            'max_units' => 10,
             'active' => true
         ]);
 

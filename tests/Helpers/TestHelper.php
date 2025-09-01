@@ -73,7 +73,8 @@ if (! function_exists('create_test_vehicle_type')) {
         return \App\Models\VehicleType::create(array_merge([
             'name' => 'Test Vehicle',
             'code' => 'test',
-            'capacity' => 4,
+            'max_pax' => 4,
+            'max_units' => 10,
             'active' => true
         ], $attributes));
     }
