@@ -38,13 +38,33 @@
     },
     {
       "key": "zone_id",
-      "value": "1",
-      "type": "string"
+      "value": "507",
+      "type": "string",
+      "description": "Punta Cancun Zone ID"
     },
     {
       "key": "location_id",
-      "value": "1",
-      "type": "string"
+      "value": "5560",
+      "type": "string",
+      "description": "Beach Palace Cancun (Punta Cancun zone)"
+    },
+    {
+      "key": "from_location_id",
+      "value": "5560",
+      "type": "string",
+      "description": "Beach Palace Cancun - Punta Cancun"
+    },
+    {
+      "key": "to_location_id",
+      "value": "2288",
+      "type": "string",
+      "description": "UNICO Hotel Riviera Maya - Akumal"
+    },
+    {
+      "key": "playa_location_id",
+      "value": "909",
+      "type": "string",
+      "description": "Playa del Carmen Ferry"
     },
     {
       "key": "service_feature_id",
@@ -78,6 +98,49 @@
     }
   ],
   "item": [
+    {
+      "name": "Health Check",
+      "item": [
+        {
+          "name": "API Health Status",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{base_url}}{{api_prefix}}/health",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "{{api_prefix}}",
+                "health"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('API is healthy', function () {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json).to.have.property('success', true);",
+                  "  pm.expect(json).to.have.property('services');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
     {
       "name": "Auth",
       "item": [
@@ -118,11 +181,14 @@
       "name": "Autocomplete",
       "item": [
         {
-          "name": "GET /autocomplete?query=",
+          "name": "Autocomplete - Departure FROM Airport (Airports Only)",
           "request": {
             "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" }
+            ],
             "url": {
-              "raw": "{{base_url}}{{api_prefix}}/autocomplete?query={{query}}",
+              "raw": "{{base_url}}{{api_prefix}}/autocomplete?lang=en&type=departure&input=from&q=cancun",
               "host": [
                 "{{base_url}}"
               ],
@@ -132,9 +198,24 @@
               ],
               "query": [
                 {
-                  "key": "query",
-                  "value": "air",
-                  "description": "Search text"
+                  "key": "lang",
+                  "value": "en",
+                  "description": "Language code (en, es)"
+                },
+                {
+                  "key": "type",
+                  "value": "departure",
+                  "description": "Departure service - departing FROM airport"
+                },
+                {
+                  "key": "input",
+                  "value": "from",
+                  "description": "FROM airport - should show airports only"
+                },
+                {
+                  "key": "q",
+                  "value": "cancun",
+                  "description": "Search for Cancun airport"
                 }
               ]
             }
@@ -145,7 +226,261 @@
               "listen": "test",
               "script": {
                 "exec": [
-                  "pm.test('Status 200', function () { pm.response.to.have.status(200); });"
+                  "pm.test('Status 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Shows airports for departure from', function () {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.data.meta.search_context).to.equal('airports');",
+                  "  pm.expect(json.data.airport).to.be.an('array');",
+                  "  pm.expect(json.data.airport.length).to.be.greaterThan(0);",
+                  "  pm.expect(json.data.zones).to.be.an('array').that.is.empty;",
+                  "  pm.expect(json.data.locations).to.be.an('object').that.is.empty;",
+                  "});".
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Autocomplete - Departure TO Destinations (Hotels)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{base_url}}{{api_prefix}}/autocomplete?lang=en&type=departure&input=to&q=Cancun",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "{{api_prefix}}",
+                "autocomplete"
+              ],
+              "query": [
+                {
+                  "key": "lang",
+                  "value": "en",
+                  "description": "Language code (en, es)"
+                },
+                {
+                  "key": "type",
+                  "value": "departure",
+                  "description": "Departure service - going TO destination"
+                },
+                {
+                  "key": "input",
+                  "value": "to",
+                  "description": "TO destination - should show hotels/locations"
+                },
+                {
+                  "key": "q",
+                  "value": "Cancun",
+                  "description": "Search for Cancun hotels/locations"
+                }
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Shows grouped locations for departure to', function () {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.data.meta.search_context).to.equal('destinations');",
+                  "  pm.expect(json.data.airport).to.be.an('array').that.is.empty;",
+                  "  pm.expect(json.data.locations).to.be.an('object');",
+                  "  const locationGroups = Object.keys(json.data.locations);",
+                  "  pm.expect(locationGroups.length).to.be.greaterThan(0);",
+                  "  if (locationGroups.length > 0) {",
+                  "    const firstGroup = json.data.locations[locationGroups[0]];",
+                  "    pm.expect(firstGroup).to.have.property('name');",
+                  "    pm.expect(firstGroup).to.have.property('locations');",
+                  "    pm.expect(firstGroup.locations[0]).to.have.property('zone');",
+                  "  }",
+                  "});".
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Autocomplete - Search Hotels (Zone Info Included)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{base_url}}{{api_prefix}}/autocomplete?q=Hotel&limit=10",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "{{api_prefix}}",
+                "autocomplete"
+              ],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "Hotel",
+                  "description": "Search for hotels - returns locations with zone info for rates"
+                },
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "description": "Number of results to return"
+                }
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Has grouped locations with zone info', function () {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json).to.have.property('success', true);",
+                  "  pm.expect(json.data.locations).to.be.an('object');",
+                  "  const locationGroups = Object.keys(json.data.locations);",
+                  "  if (locationGroups.length > 0) {",
+                  "    const firstGroup = json.data.locations[locationGroups[0]];",
+                  "    pm.expect(firstGroup.locations[0]).to.have.property('zone');",
+                  "    pm.expect(firstGroup.locations[0]).to.have.property('city');",
+                  "  }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Autocomplete - Arrival TO Airport (Airports Only)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{base_url}}{{api_prefix}}/autocomplete?lang=en&type=arrival&input=to&q=cozumel",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "{{api_prefix}}",
+                "autocomplete"
+              ],
+              "query": [
+                {
+                  "key": "lang",
+                  "value": "en",
+                  "description": "Language code (en, es)"
+                },
+                {
+                  "key": "type",
+                  "value": "arrival",
+                  "description": "Arrival service - arriving TO airport"
+                },
+                {
+                  "key": "input",
+                  "value": "to",
+                  "description": "TO airport - should show airports only"
+                },
+                {
+                  "key": "q",
+                  "value": "cozumel",
+                  "description": "Search for Cozumel airport"
+                }
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Shows airports for arrival to', function () {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.data.meta.search_context).to.equal('airports');",
+                  "  pm.expect(json.data.airport).to.be.an('array');",
+                  "  pm.expect(json.data.airport.length).to.be.greaterThan(0);",
+                  "  pm.expect(json.data.locations).to.be.an('object').that.is.empty;",
+                  "});".
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Autocomplete - Hotel to Hotel (Destinations Only)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{base_url}}{{api_prefix}}/autocomplete?lang=es&type=hotel-to-hotel&input=from&q=Playa",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "{{api_prefix}}",
+                "autocomplete"
+              ],
+              "query": [
+                {
+                  "key": "lang",
+                  "value": "es",
+                  "description": "Spanish language"
+                },
+                {
+                  "key": "type",
+                  "value": "hotel-to-hotel",
+                  "description": "Hotel to hotel service - no airports"
+                },
+                {
+                  "key": "input",
+                  "value": "from",
+                  "description": "FROM location - should show destinations only"
+                },
+                {
+                  "key": "q",
+                  "value": "Playa",
+                  "description": "Search for Playa locations"
+                }
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Shows grouped destinations for hotel-to-hotel', function () {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.data.meta.search_context).to.equal('destinations');",
+                  "  pm.expect(json.data.meta.lang).to.equal('es');",
+                  "  pm.expect(json.data.airport).to.be.an('array').that.is.empty;",
+                  "  pm.expect(json.data.locations).to.be.an('object');",
+                  "  const locationGroups = Object.keys(json.data.locations);",
+                  "  if (locationGroups.length > 0) {",
+                  "    const firstGroup = json.data.locations[locationGroups[0]];",
+                  "    pm.expect(firstGroup.locations[0]).to.have.property('zone');",
+                  "  }",
+                  "});"
                 ],
                 "type": "text/javascript"
               }
@@ -158,11 +493,15 @@
       "name": "Quotes",
       "item": [
         {
-          "name": "GET /quote",
+          "name": "Round Trip Quote (Punta Cancun to Akumal)",
           "request": {
             "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
             "url": {
-              "raw": "{{base_url}}{{api_prefix}}/quote?from={{from}}&to={{to}}&date={{date}}",
+              "raw": "{{base_url}}{{api_prefix}}/quote?service_type=round-trip&from_location_id={{from_location_id}}&to_location_id={{to_location_id}}&pax=2",
               "host": [
                 "{{base_url}}"
               ],
@@ -172,16 +511,30 @@
               ],
               "query": [
                 {
-                  "key": "from",
-                  "value": "LOC-001"
+                  "key": "service_type",
+                  "value": "round-trip",
+                  "description": "Service type: round-trip, one-way, hotel-to-hotel"
                 },
                 {
-                  "key": "to",
-                  "value": "LOC-002"
+                  "key": "from_location_id",
+                  "value": "{{from_location_id}}",
+                  "description": "Beach Palace Cancun (Punta Cancun)"
+                },
+                {
+                  "key": "to_location_id",
+                  "value": "{{to_location_id}}",
+                  "description": "UNICO Hotel Riviera Maya (Akumal)"
+                },
+                {
+                  "key": "pax",
+                  "value": "2",
+                  "description": "Number of passengers"
                 },
                 {
                   "key": "date",
-                  "value": "2025-12-31T10:00:00Z"
+                  "value": "2025-12-31",
+                  "description": "Travel date (optional)",
+                  "disabled": true
                 }
               ]
             }
@@ -192,8 +545,126 @@
               "listen": "test",
               "script": {
                 "exec": [
-                  "pm.test('Status 200 or 422', function () {",
-                  "  pm.expect([200, 422]).to.include(pm.response.code);",
+                  "pm.test('Status 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Has quote data', function () {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json).to.have.property('success', true);",
+                  "  pm.expect(json.data).to.have.property('prices');",
+                  "  pm.expect(json.data).to.have.property('serviceTypeTPV');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "One Way Quote (Punta Cancun to Playa del Carmen)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{base_url}}{{api_prefix}}/quote?service_type=one-way&from_location_id={{from_location_id}}&to_location_id={{playa_location_id}}&pax=4",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "{{api_prefix}}",
+                "quote"
+              ],
+              "query": [
+                {
+                  "key": "service_type",
+                  "value": "one-way"
+                },
+                {
+                  "key": "from_location_id",
+                  "value": "{{from_location_id}}"
+                },
+                {
+                  "key": "to_location_id",
+                  "value": "{{playa_location_id}}"
+                },
+                {
+                  "key": "pax",
+                  "value": "4"
+                }
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Service type is correct', function () {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.data.serviceTypeTPV).to.include('service_');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Hotel to Hotel Quote (Playa del Carmen to Akumal)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{base_url}}{{api_prefix}}/quote?service_type=hotel-to-hotel&from_location_id={{playa_location_id}}&to_location_id={{to_location_id}}&pax=6",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "{{api_prefix}}",
+                "quote"
+              ],
+              "query": [
+                {
+                  "key": "service_type",
+                  "value": "hotel-to-hotel"
+                },
+                {
+                  "key": "from_location_id",
+                  "value": "{{playa_location_id}}"
+                },
+                {
+                  "key": "to_location_id",
+                  "value": "{{to_location_id}}"
+                },
+                {
+                  "key": "pax",
+                  "value": "6"
+                }
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Is hotel to hotel service', function () {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.data.serviceTypeTPV).to.equal('service_hotel_hotel');",
                   "});"
                 ],
                 "type": "text/javascript"
@@ -220,12 +691,12 @@
                 "cities"
               ],
               "query": [
-                { "key": "search", "value": "York" },
-                { "key": "country", "value": "" },
-                { "key": "state", "value": "" },
-                { "key": "sort_by", "value": "name" },
-                { "key": "sort_order", "value": "asc" },
-                { "key": "per_page", "value": "10" }
+                { "key": "search", "value": "Cancun", "description": "Search for cities containing 'Cancun'" },
+                { "key": "country", "value": "Mexico", "description": "Filter by country", "disabled": true },
+                { "key": "state", "value": "Quintana Roo", "description": "Filter by state", "disabled": true },
+                { "key": "sort_by", "value": "name", "description": "Sort by field" },
+                { "key": "sort_order", "value": "asc", "description": "Sort order: asc or desc" },
+                { "key": "per_page", "value": "10", "description": "Results per page" }
               ]
             }
           },
@@ -256,7 +727,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Sample City\",\n  \"state\": \"Sample State\",\n  \"country\": \"Sample Country\"\n}"
+              "raw": "{\n  \"name\": \"Test City Cancun\",\n  \"state\": \"Quintana Roo\",\n  \"country\": \"Mexico\"\n}"
             },
             "url": {
               "raw": "{{base_url}}{{api_prefix}}/cities",
@@ -401,7 +872,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Downtown\",\n  \"city_id\": {{city_id}},\n  \"active\": true,\n  \"description\": \"Central business district\"\n}"
+              "raw": "{\n  \"name\": \"Hotel Zone Test\",\n  \"city_id\": {{city_id}},\n  \"active\": true,\n  \"description\": \"Hotel zone area for testing\"\n}"
             },
             "url": {
               "raw": "{{base_url}}{{api_prefix}}/zones",
@@ -519,21 +990,66 @@
       "name": "Locations",
       "item": [
         {
-          "name": "List Locations (active)",
+          "name": "List Locations (with filters)",
           "request": {
             "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" }
+            ],
             "url": {
-              "raw": "{{base_url}}{{api_prefix}}/locations",
+              "raw": "{{base_url}}{{api_prefix}}/locations?search=hotel&zone_id={{zone_id}}&type=H&per_page=20",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
                 "{{api_prefix}}",
                 "locations"
+              ],
+              "query": [
+                {
+                  "key": "search",
+                  "value": "hotel",
+                  "description": "Search in location names"
+                },
+                {
+                  "key": "zone_id",
+                  "value": "{{zone_id}}",
+                  "description": "Filter by zone (507=Punta Cancun)",
+                  "disabled": true
+                },
+                {
+                  "key": "type",
+                  "value": "H",
+                  "description": "Filter by type: H=Hotel, B=Bus, F=Ferry",
+                  "disabled": true
+                },
+                {
+                  "key": "per_page",
+                  "value": "20",
+                  "description": "Results per page"
+                }
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Has locations data', function () {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json).to.have.property('success', true);",
+                  "  pm.expect(json.data).to.be.an('array');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Create Location",
@@ -544,7 +1060,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Central Station\",\n  \"city_id\": {{city_id}},\n  \"type\": \"train\",\n  \"active\": true,\n  \"description\": \"Main train station\",\n  \"latitude\": 40.7128,\n  \"longitude\": -74.0060\n}"
+              "raw": "{\n  \"name\": \"Test Hotel Cancun\",\n  \"zone_id\": {{zone_id}},\n  \"type\": \"H\",\n  \"active\": true,\n  \"description\": \"Test hotel location\",\n  \"latitude\": 21.1619,\n  \"longitude\": -86.8515\n}"
             },
             "url": {
               "raw": "{{base_url}}{{api_prefix}}/locations",
@@ -675,7 +1191,8 @@
               "variable": [
                 {
                   "key": "type",
-                  "value": "train"
+                  "value": "H",
+                  "description": "Location type: H=Hotel, B=Bus Station, F=Ferry"
                 }
               ]
             }
@@ -927,7 +1444,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Standard City Rate\",\n  \"amount\": 49.99,\n  \"currency\": \"USD\",\n  \"active\": true\n}"
+              "raw": "{\n  \"service_type_id\": 1,\n  \"vehicle_type_id\": 1,\n  \"from_zone_id\": 507,\n  \"to_zone_id\": 3,\n  \"cost_vehicle_one_way\": 85.00,\n  \"total_one_way\": 85,\n  \"cost_vehicle_round_trip\": 160.00,\n  \"total_round_trip\": 160,\n  \"available\": true\n}"
             },
             "url": {
               "raw": "{{base_url}}{{api_prefix}}/rates",
@@ -969,7 +1486,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Standard City Rate Updated\",\n  \"amount\": 55.00,\n  \"active\": true\n}"
+              "raw": "{\n  \"cost_vehicle_one_way\": 90.00,\n  \"total_one_way\": 90,\n  \"cost_vehicle_round_trip\": 170.00,\n  \"total_round_trip\": 170,\n  \"available\": true\n}"
             },
             "url": {
               "raw": "{{base_url}}{{api_prefix}}/rates/{{rate_id}}",
@@ -1002,6 +1519,114 @@
             }
           },
           "response": []
+        },
+        {
+          "name": "Get Route Rates (Location to Location)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{base_url}}{{api_prefix}}/rates/route?service_type_id=1&from_location_id={{from_location_id}}&to_location_id={{to_location_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "{{api_prefix}}",
+                "rates",
+                "route"
+              ],
+              "query": [
+                {
+                  "key": "service_type_id",
+                  "value": "1",
+                  "description": "Service Type ID (1=Round Trip, 2=One Way, 3=Hotel to Hotel)"
+                },
+                {
+                  "key": "from_location_id",
+                  "value": "{{from_location_id}}",
+                  "description": "From location ID"
+                },
+                {
+                  "key": "to_location_id",
+                  "value": "{{to_location_id}}",
+                  "description": "To location ID"
+                },
+                {
+                  "key": "date",
+                  "value": "2025-12-31",
+                  "description": "Optional date for rate validation",
+                  "disabled": true
+                }
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200 or 404', function () {",
+                  "  pm.expect([200, 404]).to.include(pm.response.code);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Zone Rates (Zone to Zone)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{base_url}}{{api_prefix}}/rates/zone?service_type_id=1&from_zone_id=507&to_zone_id=3",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "{{api_prefix}}",
+                "rates",
+                "zone"
+              ],
+              "query": [
+                {
+                  "key": "service_type_id",
+                  "value": "1",
+                  "description": "Service Type ID (1=Round Trip)"
+                },
+                {
+                  "key": "from_zone_id",
+                  "value": "507",
+                  "description": "From zone ID (507=Punta Cancun)"
+                },
+                {
+                  "key": "to_zone_id",
+                  "value": "3",
+                  "description": "To zone ID (3=Akumal)"
+                }
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200 or 404', function () {",
+                  "  pm.expect([200, 404]).to.include(pm.response.code);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         }
       ]
     }
