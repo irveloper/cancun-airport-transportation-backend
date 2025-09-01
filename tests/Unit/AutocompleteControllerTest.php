@@ -25,10 +25,10 @@ class AutocompleteControllerTest extends TestCase
         $this->controller = new AutocompleteController();
         
         // Create test data
-        $this->createTestData();
+        $this->createAutocompleteTestData();
     }
 
-    private function createTestData(): void
+    protected function createAutocompleteTestData(): void
     {
         // Create cities
         $miami = City::create([

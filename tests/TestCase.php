@@ -245,17 +245,17 @@ abstract class TestCase extends BaseTestCase
     }
 
     /**
-     * Assert that a model exists in the database
+     * Assert that a model exists in the database with specific attributes
      */
-    protected function assertModelExists(string $model, array $attributes): void
+    protected function assertModelExistsWithAttributes(string $model, array $attributes): void
     {
         $this->assertDatabaseHas((new $model)->getTable(), $attributes);
     }
 
     /**
-     * Assert that a model does not exist in the database
+     * Assert that a model does not exist in the database with specific attributes
      */
-    protected function assertModelMissing(string $model, array $attributes): void
+    protected function assertModelMissingWithAttributes(string $model, array $attributes): void
     {
         $this->assertDatabaseMissing((new $model)->getTable(), $attributes);
     }

@@ -27,10 +27,10 @@ class RateModelTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->createTestData();
+        $this->createRateTestData();
     }
 
-    private function createTestData(): void
+    protected function createRateTestData(): void
     {
         $city = City::create([
             'name' => 'Miami',

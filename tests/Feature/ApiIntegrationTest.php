@@ -21,10 +21,10 @@ class ApiIntegrationTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->createTestData();
+        $this->createApiTestData();
     }
 
-    private function createTestData(): void
+    protected function createApiTestData(): void
     {
         $miami = City::create([
             'name' => 'Miami',

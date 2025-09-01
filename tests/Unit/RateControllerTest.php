@@ -30,10 +30,10 @@ class RateControllerTest extends TestCase
     {
         parent::setUp();
         $this->controller = new RateController();
-        $this->createTestData();
+        $this->createRateTestData();
     }
 
-    private function createTestData(): void
+    protected function createRateTestData(): void
     {
         $city = City::create([
             'name' => 'Miami',
