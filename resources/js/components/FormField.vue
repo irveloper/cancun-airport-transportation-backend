@@ -14,7 +14,7 @@ interface Props {
     step?: string;
 }
 
-const props = withDefaults(defineProps<Props>(), {
+withDefaults(defineProps<Props>(), {
     type: 'text',
     placeholder: '',
     required: false,
