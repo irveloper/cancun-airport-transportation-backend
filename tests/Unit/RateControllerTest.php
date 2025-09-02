@@ -591,7 +591,9 @@ class RateControllerTest extends TestCase
 
     public function test_date_filtering(): void
     {
-        $futureDate = Carbon::now()->addWeek();
+        $searchDate = Carbon::now()->addWeek();
+        $validFrom = $searchDate->copy()->subDay();
+        $validTo = $searchDate->copy()->addMonth();
 
         Rate::create([
             'service_type_id' => $this->serviceType->id,
@@ -604,12 +606,12 @@ class RateControllerTest extends TestCase
             'total_round_trip' => 110.00,
             'num_vehicles' => 1,
             'available' => true,
-            'valid_from' => $futureDate,
-            'valid_to' => $futureDate->copy()->addMonth()
+            'valid_from' => $validFrom,
+            'valid_to' => $validTo
         ]);
 
         $request = new Request([
-            'valid_date' => $futureDate->format('Y-m-d')
+            'valid_date' => $searchDate->format('Y-m-d')
         ]);
 
         $response = $this->controller->index($request);

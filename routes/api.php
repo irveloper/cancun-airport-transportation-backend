@@ -52,7 +52,7 @@ Route::prefix('v1')->middleware([ApiRateLimit::class])->group(function () {
     });
 
     // Autocomplete service for booking flow
-    Route::get('/autocomplete', [AutocompleteController::class, 'search']);
+    Route::get('/autocomplete/search', [AutocompleteController::class, 'search']);
 
     // Cities API Routes
     Route::apiResource('cities', CityController::class);
