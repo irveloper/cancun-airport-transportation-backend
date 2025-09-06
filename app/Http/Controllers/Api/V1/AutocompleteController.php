@@ -48,8 +48,8 @@ class AutocompleteController extends BaseApiController
                 'limit.max' => 'Limit must not exceed 100',
             ]);
 
-            // Get search query from either 'q' or 'query' parameter
-            $searchQuery = $validated['q'] ?? $validated['query'] ?? '';
+            // Get search query from either 'q' or 'query' parameter and sanitize it
+            $searchQuery = htmlspecialchars(strip_tags($validated['q'] ?? $validated['query'] ?? ''), ENT_QUOTES, 'UTF-8');
             $lang = $validated['lang'] ?? 'en';
             $type = $validated['type'] ?? 'departure';
             $input = $validated['input'] ?? 'to';
