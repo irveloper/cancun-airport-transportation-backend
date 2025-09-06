@@ -36,30 +36,52 @@ class AirportRateSeeder extends Seeder
             $limousines->id => ['name' => 'Limousines', 'ow_multiplier' => 8.8, 'rt_multiplier' => 18.3],
         ];
 
-        // Define airport zones - these are the zones where airports are conceptually located
-        $airportZones = [
+        // Define airport zones by name - these are the zones where airports are conceptually located
+        $airportZoneNames = [
             'CUN' => [
                 'airport_name' => 'Cancun Airport',
-                'zone_id' => 507, // Punta Cancun - closest to airport operations
-                'city_zones' => [507, 1447], // Punta Cancun and Cancun City
+                'zone_name' => 'Punta Cancun', // Punta Cancun - closest to airport operations
+                'city_zone_names' => ['Punta Cancun', 'Cancun City'], // Main zones for this airport
             ],
             'PCM' => [
                 'airport_name' => 'Playa del Carmen Airport',
-                'zone_id' => 908, // Playa del Carmen
-                'city_zones' => [908], // Playa del Carmen
+                'zone_name' => 'Playa del Carmen', // Playa del Carmen
+                'city_zone_names' => ['Playa del Carmen'], // Main zones for this airport
             ]
         ];
 
-        // All destination zones (everywhere people travel to)
-        $destinationZones = [
-            507 => ['name' => 'Punta Cancun', 'base_price' => 35],      // Hotel Zone
-            1447 => ['name' => 'Cancun City', 'base_price' => 45],      // Downtown
-            1589 => ['name' => 'Puerto Juarez', 'base_price' => 50],    // Ferry
-            908 => ['name' => 'Playa del Carmen', 'base_price' => 65],   // Playa
-            3 => ['name' => 'Akumal', 'base_price' => 82],              // Akumal
-            1 => ['name' => 'Tulum', 'base_price' => 95],               // Tulum Downtown  
-            2 => ['name' => 'Tulum Hotel Zone', 'base_price' => 105],   // Tulum Beach
+        // Convert airport zone names to actual zone data with auto-increment IDs
+        $airportZones = [];
+        foreach ($airportZoneNames as $code => $data) {
+            $zone = Zone::where('name', $data['zone_name'])->first();
+            if ($zone) {
+                $airportZones[$code] = [
+                    'airport_name' => $data['airport_name'],
+                    'zone_id' => $zone->id,
+                    'city_zones' => Zone::whereIn('name', $data['city_zone_names'])->pluck('id')->toArray(),
+                ];
+            }
+        }
+
+        // All destination zones (everywhere people travel to) by name
+        $destinationZoneNames = [
+            'Punta Cancun' => ['base_price' => 35],      // Hotel Zone
+            'Cancun City' => ['base_price' => 45],      // Downtown
+            'Puerto Juarez' => ['base_price' => 50],    // Ferry
+            'Playa del Carmen' => ['base_price' => 65],   // Playa
+            'Akumal' => ['base_price' => 82],              // Akumal
+            'Tulum' => ['base_price' => 95],               // Tulum Downtown  
+            'Tulum Hotel Zone' => ['base_price' => 105],   // Tulum Beach
         ];
+
+        // Convert destination zone names to actual zone data with auto-increment IDs
+        $destinationZones = [];
+        foreach ($destinationZoneNames as $zoneName => $data) {
+            $zone = Zone::where('name', $zoneName)->first();
+            if ($zone) {
+                $destinationZones[$zone->id] = array_merge(['name' => $zoneName], $data);
+            }
+        }
 
         $this->command->info('Creating comprehensive airport-to-destination rates...');
 
@@ -132,14 +154,14 @@ class AirportRateSeeder extends Seeder
         }
 
         // Create additional rates for airports to secondary Cancun zones (local area coverage)
-        $cancunLocalZones = [223, 5186, 5332, 5439, 5771, 5627, 5353]; // Various Cancun zones
-        $cancunAirportZone = 507; // Punta Cancun (airport area)
+        $cancunLocalZoneNames = ['Club Internacional Cancun', 'Coco Bongo Cancun', 'Playa Delfines Cancun', 
+                                'Playa Langosta Cancun', 'Plaza Caracol Cancun', 'Plaza La Isla Cancun', 'Plazas Outlet Cancun'];
+        $cancunAirportZone = Zone::where('name', 'Punta Cancun')->first(); // Punta Cancun (airport area)
 
-        foreach ($cancunLocalZones as $localZoneId) {
+        foreach ($cancunLocalZoneNames as $localZoneName) {
             try {
-                // Check if zone exists
-                $zone = Zone::find($localZoneId);
-                if (!$zone) continue;
+                $zone = Zone::where('name', $localZoneName)->first();
+                if (!$zone || !$cancunAirportZone) continue;
 
                 foreach ([$roundTrip, $oneWay] as $serviceType) {
                     if (!$serviceType) continue;
@@ -156,8 +178,8 @@ class AirportRateSeeder extends Seeder
                         Rate::create([
                             'service_type_id' => $serviceType->id,
                             'vehicle_type_id' => $vehicleTypeId,
-                            'from_zone_id' => $cancunAirportZone,
-                            'to_zone_id' => $localZoneId,
+                            'from_zone_id' => $cancunAirportZone->id,
+                            'to_zone_id' => $zone->id,
                             'cost_vehicle_one_way' => $owPrice,
                             'total_one_way' => $owPrice,
                             'cost_vehicle_round_trip' => $rtPrice,
@@ -172,8 +194,8 @@ class AirportRateSeeder extends Seeder
                         Rate::create([
                             'service_type_id' => $serviceType->id,
                             'vehicle_type_id' => $vehicleTypeId,
-                            'from_zone_id' => $localZoneId,
-                            'to_zone_id' => $cancunAirportZone,
+                            'from_zone_id' => $zone->id,
+                            'to_zone_id' => $cancunAirportZone->id,
                             'cost_vehicle_one_way' => $owPrice,
                             'total_one_way' => $owPrice,
                             'cost_vehicle_round_trip' => $rtPrice,
@@ -193,11 +215,19 @@ class AirportRateSeeder extends Seeder
             }
         }
 
-        $totalAirportRates = Rate::where(function($query) {
-            $query->where('from_zone_id', 507) // From Punta Cancun (Airport area)
-                  ->orWhere('to_zone_id', 507)   // To Punta Cancun (Airport area)
-                  ->orWhere('from_zone_id', 908) // From Playa del Carmen (Airport area)
-                  ->orWhere('to_zone_id', 908);  // To Playa del Carmen (Airport area)
+        // Get airport zone IDs dynamically
+        $puntaCancunZone = Zone::where('name', 'Punta Cancun')->first();
+        $playaDelCarmenZone = Zone::where('name', 'Playa del Carmen')->first();
+        
+        $totalAirportRates = Rate::where(function($query) use ($puntaCancunZone, $playaDelCarmenZone) {
+            if ($puntaCancunZone) {
+                $query->orWhere('from_zone_id', $puntaCancunZone->id) // From Punta Cancun (Airport area)
+                      ->orWhere('to_zone_id', $puntaCancunZone->id);   // To Punta Cancun (Airport area)
+            }
+            if ($playaDelCarmenZone) {
+                $query->orWhere('from_zone_id', $playaDelCarmenZone->id) // From Playa del Carmen (Airport area)
+                      ->orWhere('to_zone_id', $playaDelCarmenZone->id);  // To Playa del Carmen (Airport area)
+            }
         })->count();
 
         $totalRates = Rate::count();
@@ -209,9 +239,13 @@ class AirportRateSeeder extends Seeder
         foreach ([$roundTrip, $oneWay] as $serviceType) {
             if ($serviceType) {
                 $count = Rate::where('service_type_id', $serviceType->id)
-                    ->where(function($query) {
-                        $query->where('from_zone_id', 507)->orWhere('to_zone_id', 507)
-                              ->orWhere('from_zone_id', 908)->orWhere('to_zone_id', 908);
+                    ->where(function($query) use ($puntaCancunZone, $playaDelCarmenZone) {
+                        if ($puntaCancunZone) {
+                            $query->orWhere('from_zone_id', $puntaCancunZone->id)->orWhere('to_zone_id', $puntaCancunZone->id);
+                        }
+                        if ($playaDelCarmenZone) {
+                            $query->orWhere('from_zone_id', $playaDelCarmenZone->id)->orWhere('to_zone_id', $playaDelCarmenZone->id);
+                        }
                     })->count();
                 $this->command->line("- Airport {$serviceType->name} ({$serviceType->code}): {$count} rates");
             }

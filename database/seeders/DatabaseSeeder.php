@@ -29,7 +29,8 @@ class DatabaseSeeder extends Seeder
             ServiceTypeSeeder::class,
             ServiceFeatureSeeder::class, // Debe ejecutarse antes de VehicleTypeSeeder
             VehicleTypeSeeder::class,
-            RateSeeder::class, // Debe ejecutarse después de tener ubicaciones, servicios y vehículos
+            ComprehensiveAllZoneRateSeeder::class, // Comprehensive rates for ALL zone combinations
+            CurrencyExchangeSeeder::class,
         ]);
     }
 }

@@ -53,19 +53,16 @@ class AirportSeeder extends Seeder
 
         $airports = [
             [
-                'id' => 1551,
                 'name' => 'Cancun Airport (CUN)',
                 'code' => 'CUN',
                 'city_id' => $cancun->id,
             ],
             [
-                'id' => 1552,
                 'name' => 'Cozumel Airport (CZM)',
                 'code' => 'CZM', 
                 'city_id' => $cozumel->id,
             ],
             [
-                'id' => 1553,
                 'name' => 'Playa del Carmen Airport',
                 'code' => 'PCM',
                 'city_id' => $playaDelCarmen->id,
@@ -73,9 +70,12 @@ class AirportSeeder extends Seeder
         ];
 
         foreach ($airports as $airportData) {
-            Airport::updateOrCreate(
-                ['id' => $airportData['id']],
-                $airportData
+            Airport::firstOrCreate(
+                ['code' => $airportData['code']],
+                [
+                    'name' => $airportData['name'],
+                    'city_id' => $airportData['city_id']
+                ]
             );
         }
     }

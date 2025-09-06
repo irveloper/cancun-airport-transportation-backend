@@ -74,11 +74,14 @@ class VehicleTypeSeeder extends Seeder
             'active' => true,
         ]);
 
+        // Get features by sort_order to avoid hardcoded IDs
+        $features = ServiceFeature::whereIn('sort_order', [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15])->get()->keyBy('sort_order');
+
         // Asignar features a cada tipo de vehículo
-        $standardPrivate->serviceFeatures()->attach([1, 2, 3, 4, 5, 6, 7, 8]); // Standard features
-        $crafter->serviceFeatures()->attach([1, 2, 3, 5, 6, 7, 8]); // Similar to standard but larger
-        $vipPrivate->serviceFeatures()->attach([1, 2, 3, 4, 9, 5, 8]); // VIP with towels and water
-        $economicalLimo->serviceFeatures()->attach([1, 10, 11, 13, 15, 14, 8]); // Limo features with wine but no car seats
-        $limousines->serviceFeatures()->attach([1, 10, 12, 13, 6, 14, 2, 8]); // Premium limo with sparkling wine
+        $standardPrivate->serviceFeatures()->attach($features->only([1, 2, 3, 4, 5, 6, 7, 8])->pluck('id')); // Standard features
+        $crafter->serviceFeatures()->attach($features->only([1, 2, 3, 5, 6, 7, 8])->pluck('id')); // Similar to standard but larger
+        $vipPrivate->serviceFeatures()->attach($features->only([1, 2, 3, 4, 9, 5, 8])->pluck('id')); // VIP with towels and water
+        $economicalLimo->serviceFeatures()->attach($features->only([1, 10, 11, 13, 15, 14, 8])->pluck('id')); // Limo features with wine but no car seats
+        $limousines->serviceFeatures()->attach($features->only([1, 10, 12, 13, 6, 14, 2, 8])->pluck('id')); // Premium limo with sparkling wine
     }
 }

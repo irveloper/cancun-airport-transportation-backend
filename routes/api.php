@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\V1\QuoteController;
 use App\Http\Controllers\Api\V1\ServiceFeatureController;
 use App\Http\Controllers\Api\V1\VehicleTypeController;
 use App\Http\Controllers\Api\V1\RateController;
+use App\Http\Controllers\Api\V1\BookingController;
 use App\Http\Middleware\ApiRateLimit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -80,5 +81,8 @@ Route::prefix('v1')->middleware([ApiRateLimit::class])->group(function () {
     Route::get('rates/route', [RateController::class, 'getRouteRates']);
     Route::get('rates/zone', [RateController::class, 'getZoneRates']);
     Route::apiResource('rates', RateController::class);
+
+    // Booking API Routes
+    Route::apiResource('bookings', BookingController::class);
 
 });
