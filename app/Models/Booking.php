@@ -38,6 +38,11 @@ class Booking extends Model
         'cancelled_at',
         'cancellation_reason',
         'quote_id',
+        'stripe_payment_intent_id',
+        'stripe_charge_id',
+        'payment_status',
+        'payment_date',
+        'payment_failure_reason',
     ];
 
     protected $casts = [
@@ -50,6 +55,7 @@ class Booking extends Model
         'departure_flight_info' => 'array',
         'confirmed_at' => 'datetime',
         'cancelled_at' => 'datetime',
+        'payment_date' => 'datetime',
     ];
 
     // Relationships
@@ -160,6 +166,26 @@ class Booking extends Model
         return in_array($this->status, ['pending', 'confirmed']) && $this->isUpcoming();
     }
 
+    public function isPaid(): bool
+    {
+        return $this->payment_status === 'paid';
+    }
+
+    public function isPaymentPending(): bool
+    {
+        return $this->payment_status === 'pending';
+    }
+
+    public function hasPaymentFailed(): bool
+    {
+        return $this->payment_status === 'failed';
+    }
+
+    public function requiresPayment(): bool
+    {
+        return $this->status === 'pending' && !$this->isPaid();
+    }
+
     public function getFormattedPrice(): string
     {
         return number_format($this->total_price, 2, '.', '');
@@ -213,6 +239,12 @@ class Booking extends Model
             'pricing' => [
                 'total' => $this->getFormattedPrice(),
                 'currency' => $this->currency,
+            ],
+            'payment' => [
+                'status' => $this->payment_status,
+                'payment_date' => $this->payment_date?->toISOString(),
+                'stripe_payment_intent_id' => $this->stripe_payment_intent_id,
+                'requires_payment' => $this->requiresPayment(),
             ],
             'flight_info' => [
                 'arrival' => $this->arrival_flight_info,

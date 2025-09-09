@@ -2,7 +2,7 @@
 	"info": {
 		"_postman_id": "fivestars-complete-api-suite-v2",
 		"name": "FiveStars Complete API Test Suite - Updated",
-		"description": "Comprehensive API testing suite with ALL quote types, complete booking management, auto-increment IDs, comprehensive rate coverage, default/seasonal rate fallbacks, and complete validation testing. Import this to test the entire FiveStars API with real working examples including the new booking service.",
+		"description": "Comprehensive API testing suite with ALL quote types, complete booking management, one-step booking+payment flow, Stripe integration, auto-increment IDs, comprehensive rate coverage, default/seasonal rate fallbacks, and complete validation testing. Import this to test the entire FiveStars API with real working examples including booking and payment processing.",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "complete-suite-2025-v2"
 	},
@@ -1733,6 +1733,471 @@
 			]
 		},
 		{
+			"name": "🚀 One-Step Booking + Payment",
+			"item": [
+				{
+					"name": "🚀 Create Booking with Payment - Complete Flow",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Booking with payment created successfully', () => pm.response.to.have.status(201));",
+									"pm.test('Response has booking and payment data', function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    pm.expect(jsonData.data).to.have.property('booking');",
+									"    pm.expect(jsonData.data).to.have.property('payment');",
+									"    pm.expect(jsonData.data.booking).to.have.property('id');",
+									"    pm.expect(jsonData.data.booking).to.have.property('booking_number');",
+									"    pm.expect(jsonData.data.payment).to.have.property('client_secret');",
+									"    pm.expect(jsonData.data.payment).to.have.property('payment_intent_id');",
+									"    pm.expect(jsonData.data.payment).to.have.property('amount');",
+									"    pm.expect(jsonData.data.payment).to.have.property('expires_at');",
+									"});",
+									"",
+									"// Store booking and payment info for other tests",
+									"const jsonData = pm.response.json();",
+									"pm.environment.set('test_booking_id', jsonData.data.booking.id);",
+									"pm.environment.set('payment_intent_id', jsonData.data.payment.payment_intent_id);",
+									"pm.environment.set('client_secret', jsonData.data.payment.client_secret);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{"key": "Content-Type", "value": "application/json"},
+							{"key": "Accept-Language", "value": "en"}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"customerInfo\": {\n    \"firstName\": \"Michael\",\n    \"lastName\": \"Johnson\",\n    \"email\": \"michael.johnson@example.com\",\n    \"phone\": \"+1-555-9876\",\n    \"country\": \"United States\"\n  },\n  \"pickupLocation\": \"Breathless Cancun Soul Resort & Spa - Main Lobby\",\n  \"dropoffLocation\": \"Cancun International Airport - Terminal 4 Departures\",\n  \"pickupDateTime\": \"2025-12-28T08:00:00\",\n  \"passengers\": 8,\n  \"serviceId\": 5,\n  \"serviceName\": \"One Way\",\n  \"currency\": \"USD\",\n  \"totalPrice\": 185.50,\n  \"specialRequests\": \"Large group with extra luggage. Please bring spacious vehicle. One passenger uses wheelchair. Need assistance with bags.\",\n  \"childSeats\": 3,\n  \"wheelchairAccessible\": true,\n  \"hotelReservationName\": \"Johnson Extended Family Holiday Group\",\n  \"fromLocationId\": 2,\n  \"toLocationId\": 1,\n  \"fromLocationType\": \"location\",\n  \"toLocationType\": \"airport\",\n  \"tripType\": \"departure\",\n  \"bookingDate\": \"2025-09-06T18:45:00\",\n  \"departureFlightInfo\": {\n    \"airline\": \"Delta Airlines\",\n    \"flightNumber\": \"DL1547\",\n    \"date\": \"2025-12-28\",\n    \"time\": \"11:30\"\n  }\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/bookings/create-with-payment",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "bookings", "create-with-payment"]
+						}
+					}
+				},
+				{
+					"name": "💶 Create Booking with Payment - EUR Currency",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('EUR booking with payment created', () => pm.response.to.have.status(201));",
+									"pm.test('Currency is EUR', function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data.payment.currency).to.equal('eur');",
+									"    pm.expect(jsonData.data.booking.pricing.currency).to.equal('EUR');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{"key": "Content-Type", "value": "application/json"},
+							{"key": "Accept-Language", "value": "es"}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"customerInfo\": {\n    \"firstName\": \"Carlos\",\n    \"lastName\": \"García\",\n    \"email\": \"carlos.garcia@example.com\",\n    \"phone\": \"+34-91-123-4567\",\n    \"country\": \"Spain\"\n  },\n  \"pickupLocation\": \"Hotel Xcaret México - Main Lobby\",\n  \"dropoffLocation\": \"Playa del Carmen - Ferry Terminal\",\n  \"pickupDateTime\": \"2025-11-15T14:30:00\",\n  \"passengers\": 4,\n  \"serviceId\": 3,\n  \"serviceName\": \"Hotel to Hotel\",\n  \"currency\": \"EUR\",\n  \"totalPrice\": 125.75,\n  \"specialRequests\": \"Family vacation transfer. Please provide child seats.\",\n  \"childSeats\": 2,\n  \"wheelchairAccessible\": false,\n  \"hotelReservationName\": \"García Family Vacation\",\n  \"fromLocationId\": 15,\n  \"toLocationId\": 22,\n  \"fromLocationType\": \"location\",\n  \"toLocationType\": \"location\",\n  \"tripType\": \"hotel-to-hotel\",\n  \"bookingDate\": \"2025-09-06T19:00:00\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/bookings/create-with-payment",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "bookings", "create-with-payment"]
+						}
+					}
+				},
+				{
+					"name": "✈️ Create Booking with Payment - Airport Arrival with Flight Info",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Airport arrival booking created', () => pm.response.to.have.status(201));",
+									"pm.test('Has flight information', function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data.booking.flight_info.arrival).to.be.an('object');",
+									"    pm.expect(jsonData.data.booking.trip_details.type).to.equal('arrival');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{"key": "Content-Type", "value": "application/json"},
+							{"key": "Accept-Language", "value": "en"}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"customerInfo\": {\n    \"firstName\": \"Sarah\",\n    \"lastName\": \"Wilson\",\n    \"email\": \"sarah.wilson@example.com\",\n    \"phone\": \"+1-555-2468\",\n    \"country\": \"Canada\"\n  },\n  \"pickupLocation\": \"Cancun International Airport - Terminal 2 Arrivals\",\n  \"dropoffLocation\": \"Grand Velas Riviera Maya - Resort Reception\",\n  \"pickupDateTime\": \"2025-10-20T16:15:00\",\n  \"passengers\": 2,\n  \"serviceId\": 2,\n  \"serviceName\": \"One Way\",\n  \"currency\": \"CAD\",\n  \"totalPrice\": 95.00,\n  \"specialRequests\": \"Honeymoon couple. Please monitor flight for delays.\",\n  \"childSeats\": 0,\n  \"wheelchairAccessible\": false,\n  \"hotelReservationName\": \"Wilson Honeymoon Suite\",\n  \"fromLocationId\": 1,\n  \"toLocationId\": 8,\n  \"fromLocationType\": \"airport\",\n  \"toLocationType\": \"location\",\n  \"tripType\": \"arrival\",\n  \"bookingDate\": \"2025-09-06T20:00:00\",\n  \"arrivalFlightInfo\": {\n    \"airline\": \"Air Canada\",\n    \"flightNumber\": \"AC1876\",\n    \"date\": \"2025-10-20\",\n    \"time\": \"16:00\"\n  }\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/bookings/create-with-payment",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "bookings", "create-with-payment"]
+						}
+					}
+				},
+				{
+					"name": "🌐 Frontend Format Test - Real Frontend Data",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Frontend format booking created successfully', () => pm.response.to.have.status(201));",
+									"pm.test('Handles frontend data format', function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    pm.expect(jsonData.data.booking).to.have.property('booking_number');",
+									"    pm.expect(jsonData.data.payment).to.have.property('client_secret');",
+									"    pm.expect(jsonData.data.booking.service.name).to.equal('One Way'); // Mapped from 'standard private'",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{"key": "Content-Type", "value": "application/json"},
+							{"key": "Accept-Language", "value": "en"}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"customerInfo\": {\n    \"firstName\": \"John\",\n    \"lastName\": \"Doe\",\n    \"email\": \"john.doe@example.com\",\n    \"phone\": \"+1-555-1234\",\n    \"country\": \"United States\"\n  },\n  \"pickupLocation\": \"Cancun Airport (CUN)\",\n  \"dropoffLocation\": \"Cancun Country Club\",\n  \"pickupDateTime\": \"2025-09-07T\",\n  \"passengers\": 1,\n  \"serviceId\": \"1\",\n  \"serviceName\": \"standard private\",\n  \"currency\": \"USD\",\n  \"totalPrice\": 20,\n  \"specialRequests\": \"Please be on time\",\n  \"arrivalFlightInfo\": {\n    \"airline\": \"American Airlines\",\n    \"flightNumber\": \"AA1234\",\n    \"date\": \"2025-09-23\",\n    \"time\": \"12:12\"\n  },\n  \"departureFlightInfo\": {\n    \"airline\": \"Delta Airlines\",\n    \"flightNumber\": \"DL5678\",\n    \"date\": \"2025-09-30\",\n    \"time\": \"21:32\"\n  },\n  \"childSeats\": 3,\n  \"wheelchairAccessible\": true,\n  \"hotelReservationName\": \"Doe Family Vacation\",\n  \"fromLocationId\": \"1\",\n  \"toLocationId\": \"3\",\n  \"fromLocationType\": \"airport\",\n  \"toLocationType\": \"zone\",\n  \"tripType\": \"arrival\",\n  \"bookingDate\": \"2025-09-07\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/bookings/create-with-payment",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "bookings", "create-with-payment"]
+						}
+					}
+				},
+				{
+					"name": "❌ Error Cases - One-Step Booking",
+					"item": [
+						{
+							"name": "❌ Missing Required Customer Info",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test('Validation error 422', () => pm.response.to.have.status(422));",
+											"pm.test('Has validation errors', function () {",
+											"    const jsonData = pm.response.json();",
+											"    pm.expect(jsonData.success).to.be.false;",
+											"    pm.expect(jsonData.errors).to.be.an('object');",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{"key": "Content-Type", "value": "application/json"}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"customerInfo\": {\n    \"firstName\": \"John\"\n  },\n  \"pickupLocation\": \"Some Hotel\",\n  \"currency\": \"USD\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/v1/bookings/create-with-payment",
+									"host": ["{{base_url}}"],
+									"path": ["api", "v1", "bookings", "create-with-payment"]
+								}
+							}
+						},
+						{
+							"name": "❌ Invalid Currency",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test('Currency validation error', () => pm.response.to.have.status(422));"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{"key": "Content-Type", "value": "application/json"}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"customerInfo\": {\n    \"firstName\": \"John\",\n    \"lastName\": \"Doe\",\n    \"email\": \"john@example.com\",\n    \"phone\": \"+1-555-0123\",\n    \"country\": \"United States\"\n  },\n  \"pickupLocation\": \"Beach Palace Cancun\",\n  \"dropoffLocation\": \"The Reef 28\",\n  \"pickupDateTime\": \"2025-11-15T10:30:00\",\n  \"passengers\": 4,\n  \"serviceName\": \"Round Trip\",\n  \"currency\": \"INVALID\",\n  \"totalPrice\": 150.00,\n  \"fromLocationId\": 1,\n  \"toLocationId\": 18,\n  \"fromLocationType\": \"location\",\n  \"toLocationType\": \"location\",\n  \"tripType\": \"round-trip\",\n  \"bookingDate\": \"2025-09-06T14:30:00\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/v1/bookings/create-with-payment",
+									"host": ["{{base_url}}"],
+									"path": ["api", "v1", "bookings", "create-with-payment"]
+								}
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "💳 Payment Integration - Stripe",
+			"item": [
+				{
+					"name": "💳 Create Payment Intent",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Payment intent created successfully', () => pm.response.to.have.status(200));",
+									"pm.test('Response has client secret', function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    pm.expect(jsonData.data).to.have.property('client_secret');",
+									"    pm.expect(jsonData.data).to.have.property('payment_intent_id');",
+									"    pm.expect(jsonData.data).to.have.property('amount');",
+									"    pm.expect(jsonData.data).to.have.property('currency');",
+									"});",
+									"",
+									"// Store payment intent for other tests",
+									"const jsonData = pm.response.json();",
+									"pm.environment.set('payment_intent_id', jsonData.data.payment_intent_id);",
+									"pm.environment.set('client_secret', jsonData.data.client_secret);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{"key": "Content-Type", "value": "application/json"},
+							{"key": "Accept", "value": "application/json"}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"booking_id\": \"{{test_booking_id}}\",\n  \"currency\": \"USD\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/create-payment-intent",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "create-payment-intent"]
+						}
+					}
+				},
+				{
+					"name": "💰 Create Payment Intent - EUR Currency",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('EUR payment intent created', () => pm.response.to.have.status(200));",
+									"pm.test('Currency is EUR', function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data.currency).to.equal('eur');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{"key": "Content-Type", "value": "application/json"},
+							{"key": "Accept", "value": "application/json"}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"booking_id\": \"{{test_booking_id}}\",\n  \"currency\": \"EUR\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/create-payment-intent",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "create-payment-intent"]
+						}
+					}
+				},
+				{
+					"name": "📊 Get Payment Status",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Payment status retrieved', () => pm.response.to.have.status(200));",
+									"pm.test('Has payment status data', function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    pm.expect(jsonData.data).to.have.property('payment_status');",
+									"    pm.expect(jsonData.data).to.have.property('booking_id');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{"key": "Accept", "value": "application/json"}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/bookings/{{test_booking_id}}/payment-status",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "bookings", "{{test_booking_id}}", "payment-status"]
+						}
+					}
+				},
+				{
+					"name": "🔔 Stripe Webhook - Payment Succeeded",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Webhook processed successfully', () => pm.response.to.have.status(200));",
+									"pm.test('Success response', function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.status).to.equal('success');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{"key": "Content-Type", "value": "application/json"},
+							{"key": "Stripe-Signature", "value": "t=1609459200,v1=test_signature"}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"id\": \"evt_test_webhook\",\n  \"object\": \"event\",\n  \"api_version\": \"2020-08-27\",\n  \"created\": 1609459200,\n  \"data\": {\n    \"object\": {\n      \"id\": \"{{payment_intent_id}}\",\n      \"object\": \"payment_intent\",\n      \"amount\": 15000,\n      \"currency\": \"usd\",\n      \"status\": \"succeeded\",\n      \"metadata\": {\n        \"booking_id\": \"{{test_booking_id}}\"\n      }\n    }\n  },\n  \"livemode\": false,\n  \"pending_webhooks\": 1,\n  \"request\": {\n    \"id\": \"req_test\",\n    \"idempotency_key\": null\n  },\n  \"type\": \"payment_intent.succeeded\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/stripe/webhook",
+							"host": ["{{base_url}}"],
+							"path": ["stripe", "webhook"]
+						}
+					}
+				},
+				{
+					"name": "❌ Payment Error Cases",
+					"item": [
+						{
+							"name": "❌ Create Payment Intent - Invalid Booking",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test('Invalid booking error', () => pm.response.to.have.status(422));",
+											"pm.test('Error message returned', function () {",
+											"    const jsonData = pm.response.json();",
+											"    pm.expect(jsonData.success).to.be.false;",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{"key": "Content-Type", "value": "application/json"}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"booking_id\": \"99999\",\n  \"currency\": \"USD\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/v1/create-payment-intent",
+									"host": ["{{base_url}}"],
+									"path": ["api", "v1", "create-payment-intent"]
+								}
+							}
+						},
+						{
+							"name": "❌ Create Payment Intent - Invalid Currency",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test('Invalid currency error', () => pm.response.to.have.status(422));"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{"key": "Content-Type", "value": "application/json"}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"booking_id\": \"{{test_booking_id}}\",\n  \"currency\": \"INVALID\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/v1/create-payment-intent",
+									"host": ["{{base_url}}"],
+									"path": ["api", "v1", "create-payment-intent"]
+								}
+							}
+						},
+						{
+							"name": "❌ Payment Status - Booking Not Found",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test('Booking not found', () => pm.response.to.have.status(404));"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/v1/bookings/99999/payment-status",
+									"host": ["{{base_url}}"],
+									"path": ["api", "v1", "bookings", "99999", "payment-status"]
+								}
+							}
+						}
+					]
+				}
+			]
+		},
+		{
 			"name": "🌐 i18n Language Testing",
 			"item": [
 				{
@@ -1879,6 +2344,18 @@
 			"value": "FS-2025-000001",
 			"type": "string",
 			"description": "Booking number for reference"
+		},
+		{
+			"key": "payment_intent_id",
+			"value": "pi_test_example",
+			"type": "string",
+			"description": "Stripe payment intent ID for testing"
+		},
+		{
+			"key": "client_secret",
+			"value": "pi_test_example_secret",
+			"type": "string",
+			"description": "Stripe client secret for frontend"
 		}
 	]
 }

@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\V1\ServiceFeatureController;
 use App\Http\Controllers\Api\V1\VehicleTypeController;
 use App\Http\Controllers\Api\V1\RateController;
 use App\Http\Controllers\Api\V1\BookingController;
+use App\Http\Controllers\Api\V1\PaymentController;
 use App\Http\Middleware\ApiRateLimit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -82,7 +83,18 @@ Route::prefix('v1')->middleware([ApiRateLimit::class])->group(function () {
     Route::get('rates/zone', [RateController::class, 'getZoneRates']);
     Route::apiResource('rates', RateController::class);
 
-    // Booking API Routes
+    // Booking API Routes (specific routes first to avoid conflicts)
+    Route::post('/bookings/create-with-payment', [BookingController::class, 'createWithPayment']);
     Route::apiResource('bookings', BookingController::class);
 
+    // Payment API Routes
+    Route::post('/create-payment-intent', [PaymentController::class, 'createPaymentIntent']);
+    Route::get('/bookings/{booking}/payment-status', [PaymentController::class, 'getPaymentStatus']);
+    
+    // Debug route for testing service name mapping
+    Route::post('/debug/service-mapping', [BookingController::class, 'debugServiceMapping']);
+    
 });
+
+// Stripe Webhook Route (outside of v1 prefix and rate limiting)
+Route::post('/stripe/webhook', [PaymentController::class, 'webhook'])->name('stripe.webhook');

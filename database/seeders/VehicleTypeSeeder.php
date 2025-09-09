@@ -17,7 +17,7 @@ class VehicleTypeSeeder extends Seeder
         $standardPrivate = VehicleType::create([
             'name' => 'standard private',
             'code' => 'ES',
-            'image' => 'van.png',
+            'image' => 'https://res.cloudinary.com/codepom-mvp/image/upload/v1757428489/five-stars/services/economic_yjkomz.webp',
             'max_units' => 44,
             'max_pax' => 7,
             'travel_time' => '1 hour and 30 minutes',
@@ -29,7 +29,7 @@ class VehicleTypeSeeder extends Seeder
         $crafter = VehicleType::create([
             'name' => 'CRAFTER',
             'code' => 'ES',
-            'image' => 'crafter.png',
+            'image' => 'https://res.cloudinary.com/codepom-mvp/image/upload/v1757428489/five-stars/services/crafter_c2mvxn.webp',
             'max_units' => 6,
             'max_pax' => 17,
             'travel_time' => '1 hour and 30 minutes',
@@ -41,7 +41,7 @@ class VehicleTypeSeeder extends Seeder
         $vipPrivate = VehicleType::create([
             'name' => 'vip private',
             'code' => 'VP',
-            'image' => 'suburban.png',
+            'image' => 'https://res.cloudinary.com/codepom-mvp/image/upload/v1757428489/five-stars/services/luxury_j4wmyt.webp',
             'max_units' => 28,
             'max_pax' => 5,
             'travel_time' => '1 hour and 30 minutes',
