@@ -27,16 +27,25 @@ class ComprehensiveRateSeeder extends Seeder
         $economicalLimo = VehicleType::where('name', 'Economical Limo')->first();
         $limousines = VehicleType::where('name', 'limousines')->first();
 
-        // Define main transportation zones and their base distances for pricing
-        $mainZones = [
-            507 => ['name' => 'Punta Cancun', 'base_price' => 0],     // Airport/Hotel Zone
-            1447 => ['name' => 'Cancun City', 'base_price' => 20],    // Downtown Cancun
-            1589 => ['name' => 'Puerto Juarez', 'base_price' => 25],  // Ferry to Isla Mujeres
-            908 => ['name' => 'Playa del Carmen', 'base_price' => 65], // Playa del Carmen
-            3 => ['name' => 'Akumal', 'base_price' => 82],            // Akumal
-            1 => ['name' => 'Tulum', 'base_price' => 95],             // Tulum Downtown
-            2 => ['name' => 'Tulum Hotel Zone', 'base_price' => 105], // Tulum Beach
+        // Define main transportation zones by name and their base distances for pricing
+        $zoneNames = [
+            'Punta Cancun' => ['base_price' => 0],     // Airport/Hotel Zone
+            'Cancun City' => ['base_price' => 20],    // Downtown Cancun
+            'Puerto Juarez' => ['base_price' => 25],  // Ferry to Isla Mujeres
+            'Playa del Carmen' => ['base_price' => 65], // Playa del Carmen
+            'Akumal' => ['base_price' => 82],            // Akumal
+            'Tulum' => ['base_price' => 95],             // Tulum Downtown
+            'Tulum Hotel Zone' => ['base_price' => 105], // Tulum Beach
         ];
+
+        // Get zones by name (using auto-increment IDs)
+        $mainZones = [];
+        foreach ($zoneNames as $zoneName => $data) {
+            $zone = Zone::where('name', $zoneName)->first();
+            if ($zone) {
+                $mainZones[$zone->id] = array_merge(['name' => $zoneName], $data);
+            }
+        }
 
         // Vehicle pricing multipliers
         $vehicleMultipliers = [
@@ -104,17 +113,20 @@ class ComprehensiveRateSeeder extends Seeder
         }
 
         // Create some additional rates for other zones within Cancun area (local transport)
-        $cancunLocalZones = [223, 5186, 5332, 5439, 5771, 5627, 5353]; // Various Cancun zones
+        $cancunLocalZoneNames = ['Club Internacional Cancun', 'Coco Bongo Cancun', 'Playa Delfines Cancun', 
+                                'Playa Langosta Cancun', 'Plaza Caracol Cancun', 'Plaza La Isla Cancun', 'Plazas Outlet Cancun'];
         
-        foreach ($cancunLocalZones as $zoneId) {
-            // Local transport within Cancun area
-            if ($hotelToHotel && $standardPrivate) {
+        $puntaCancunZone = Zone::where('name', 'Punta Cancun')->first();
+        
+        foreach ($cancunLocalZoneNames as $zoneName) {
+            $zone = Zone::where('name', $zoneName)->first();
+            if ($zone && $puntaCancunZone && $hotelToHotel && $standardPrivate) {
                 try {
                     Rate::create([
                         'service_type_id' => $hotelToHotel->id,
                         'vehicle_type_id' => $standardPrivate->id,
-                        'from_zone_id' => 507, // From Punta Cancun
-                        'to_zone_id' => $zoneId,
+                        'from_zone_id' => $puntaCancunZone->id, // From Punta Cancun
+                        'to_zone_id' => $zone->id,
                         'cost_vehicle_one_way' => 35.00,
                         'total_one_way' => 35.00,
                         'cost_vehicle_round_trip' => 65.00,
@@ -129,8 +141,8 @@ class ComprehensiveRateSeeder extends Seeder
                     Rate::create([
                         'service_type_id' => $hotelToHotel->id,
                         'vehicle_type_id' => $standardPrivate->id,
-                        'from_zone_id' => $zoneId,
-                        'to_zone_id' => 507, // To Punta Cancun
+                        'from_zone_id' => $zone->id,
+                        'to_zone_id' => $puntaCancunZone->id, // To Punta Cancun
                         'cost_vehicle_one_way' => 35.00,
                         'total_one_way' => 35.00,
                         'cost_vehicle_round_trip' => 65.00,

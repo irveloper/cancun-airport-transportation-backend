@@ -104,7 +104,11 @@ class Rate extends Model
 
     /**
      * Find rates for a specific location-to-location route with caching
-     * Priority: Zone-based rates (primary) > Location-specific rates (overrides)
+     * Priority: 
+     * 1. Location-specific rates with specific dates
+     * 2. Zone-based rates with specific dates  
+     * 3. Location-specific default rates (NULL dates)
+     * 4. Zone-based default rates (NULL dates)
      */
     public static function findForRoute($serviceTypeId, $fromLocationId, $toLocationId, $date = null)
     {
@@ -119,24 +123,52 @@ class Rate extends Model
                 return collect();
             }
 
-            $query = self::with(['vehicleType.serviceFeatures'])
+            $baseQuery = self::with(['vehicleType.serviceFeatures'])
                         ->where('service_type_id', $serviceTypeId)
-                        ->valid($date);
+                        ->where('available', true);
 
-            // First, try to find location-specific rates (these are overrides)
-            $locationSpecificRates = (clone $query)
+            // 1. First try: Location-specific rates with specific dates
+            $locationSpecificRates = (clone $baseQuery)
                 ->where('from_location_id', $fromLocationId)
                 ->where('to_location_id', $toLocationId)
+                ->valid($date)
+                ->whereNotNull('valid_from') // Has specific dates
                 ->get();
 
             if ($locationSpecificRates->isNotEmpty()) {
                 return $locationSpecificRates;
             }
 
-            // Primary approach: zone-based rates
-            return (clone $query)
+            // 2. Second try: Zone-based rates with specific dates
+            $zoneSpecificRates = (clone $baseQuery)
                 ->where('from_zone_id', $fromLocation->zone_id)
                 ->where('to_zone_id', $toLocation->zone_id)
+                ->valid($date)
+                ->whereNotNull('valid_from') // Has specific dates
+                ->get();
+
+            if ($zoneSpecificRates->isNotEmpty()) {
+                return $zoneSpecificRates;
+            }
+
+            // 3. Third try: Location-specific default rates (NULL dates = always valid)
+            $locationDefaultRates = (clone $baseQuery)
+                ->where('from_location_id', $fromLocationId)
+                ->where('to_location_id', $toLocationId)
+                ->whereNull('valid_from') // Default rates
+                ->whereNull('valid_to')   // Default rates
+                ->get();
+
+            if ($locationDefaultRates->isNotEmpty()) {
+                return $locationDefaultRates;
+            }
+
+            // 4. Final fallback: Zone-based default rates (NULL dates = always valid)
+            return (clone $baseQuery)
+                ->where('from_zone_id', $fromLocation->zone_id)
+                ->where('to_zone_id', $toLocation->zone_id)
+                ->whereNull('valid_from') // Default rates
+                ->whereNull('valid_to')   // Default rates
                 ->get();
         });
     }

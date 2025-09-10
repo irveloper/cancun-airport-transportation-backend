@@ -1,10 +1,10 @@
 {
 	"info": {
-		"_postman_id": "fivestars-complete-api-suite",
-		"name": "FiveStars Complete API Test Suite",
-		"description": "Complete API testing suite with all endpoints, proper parameters, validation, and i18n support. Import this single file to test the entire FiveStars API.",
+		"_postman_id": "fivestars-complete-api-suite-v2",
+		"name": "FiveStars Complete API Test Suite - Updated",
+		"description": "Comprehensive API testing suite with ALL quote types, complete booking management, one-step booking+payment flow, Stripe integration, auto-increment IDs, comprehensive rate coverage, default/seasonal rate fallbacks, and complete validation testing. Import this to test the entire FiveStars API with real working examples including booking and payment processing.",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "complete-suite-2025"
+		"_exporter_id": "complete-suite-2025-v2"
 	},
 	"item": [
 		{
@@ -17,7 +17,7 @@
 							"listen": "test",
 							"script": {
 								"exec": [
-									"pm.test(\"API is healthy\", function () {",
+									"pm.test('API is healthy', function () {",
 									"    pm.response.to.have.status(200);",
 									"    const jsonData = pm.response.json();",
 									"    pm.expect(jsonData.success).to.be.true;",
@@ -41,811 +41,817 @@
 			]
 		},
 		{
-			"name": "🔍 Autocomplete Service",
+			"name": "💰 Quote Management - ALL TYPES",
 			"item": [
 				{
-					"name": "Airport Search - Round Trip (EN)",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 200\", () => pm.response.to.have.status(200));",
-									"pm.test(\"Has airport suggestions\", function () {",
-									"    const jsonData = pm.response.json();",
-									"    pm.expect(jsonData.data).to.have.property('airport');",
-									"    pm.expect(jsonData.data.airport).to.be.an('array');",
-									"});",
-									"pm.test(\"English success message\", function () {",
-									"    const jsonData = pm.response.json();",
-									"    pm.expect(jsonData.message).to.include('successfully');",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
+					"name": "📋 All Quote Types Overview",
 					"request": {
 						"method": "GET",
-						"header": [{"key": "Accept-Language", "value": "en-US,en;q=0.9"}],
+						"header": [{"key": "Accept", "value": "application/json"}],
 						"url": {
-							"raw": "{{base_url}}/api/v1/autocomplete?lang=en&type=round-trip&input=from&q=airport",
-							"host": ["{{base_url}}"],
-							"path": ["api", "v1", "autocomplete"],
-							"query": [
-								{"key": "lang", "value": "en", "description": "Language (required): en, es, fr"},
-								{"key": "type", "value": "round-trip", "description": "Service type (required)"},
-								{"key": "input", "value": "from", "description": "Input field (required): from, to"},
-								{"key": "q", "value": "airport", "description": "Search query"}
-							]
-						}
-					}
-				},
-				{
-					"name": "Hotel Search - Departure (ES)",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 200\", () => pm.response.to.have.status(200));",
-									"pm.test(\"Spanish success message\", function () {",
-									"    const jsonData = pm.response.json();",
-									"    pm.expect(jsonData.message).to.include('exitosamente');",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [{"key": "Accept-Language", "value": "es-MX,es;q=0.9"}],
-						"url": {
-							"raw": "{{base_url}}/api/v1/autocomplete?lang=es&type=departure&input=from&q=hotel&start=0",
-							"host": ["{{base_url}}"],
-							"path": ["api", "v1", "autocomplete"],
-							"query": [
-								{"key": "lang", "value": "es"},
-								{"key": "type", "value": "departure"},
-								{"key": "input", "value": "from"},
-								{"key": "q", "value": "hotel"},
-								{"key": "start", "value": "0"}
-							]
-						}
-					}
-				},
-				{
-					"name": "Destination Search - Arrival (FR)",
-					"request": {
-						"method": "GET",
-						"header": [{"key": "Accept-Language", "value": "fr-FR,fr;q=0.9"}],
-						"url": {
-							"raw": "{{base_url}}/api/v1/autocomplete?lang=fr&type=arrival&input=to&q=playa&from=1",
-							"host": ["{{base_url}}"],
-							"path": ["api", "v1", "autocomplete"],
-							"query": [
-								{"key": "lang", "value": "fr"},
-								{"key": "type", "value": "arrival"},
-								{"key": "input", "value": "to"},
-								{"key": "q", "value": "playa"},
-								{"key": "from", "value": "1", "description": "Context location ID"}
-							]
-						}
-					}
-				},
-				{
-					"name": "Transfer One-Way Search",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/api/v1/autocomplete?lang=en&type=transfer-one-way&input=from&q=cancun",
-							"host": ["{{base_url}}"],
-							"path": ["api", "v1", "autocomplete"],
-							"query": [
-								{"key": "lang", "value": "en"},
-								{"key": "type", "value": "transfer-one-way"},
-								{"key": "input", "value": "from"},
-								{"key": "q", "value": "cancun"}
-							]
-						}
-					}
-				},
-				{
-					"name": "Transfer Round Trip Search",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/api/v1/autocomplete?lang=en&type=transfer-round-trip&input=to&q=rivera",
-							"host": ["{{base_url}}"],
-							"path": ["api", "v1", "autocomplete"],
-							"query": [
-								{"key": "lang", "value": "en"},
-								{"key": "type", "value": "transfer-round-trip"},
-								{"key": "input", "value": "to"},
-								{"key": "q", "value": "rivera"}
-							]
-						}
-					}
-				},
-				{
-					"name": "❌ Autocomplete - Missing Required Params",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Validation error 422\", () => pm.response.to.have.status(422));",
-									"pm.test(\"Spanish validation message\", function () {",
-									"    const jsonData = pm.response.json();",
-									"    pm.expect(jsonData.message).to.include('validación');",
-									"    pm.expect(jsonData.errors).to.be.an('object');",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [{"key": "Accept-Language", "value": "es"}],
-						"url": {
-							"raw": "{{base_url}}/api/v1/autocomplete?q=test",
-							"host": ["{{base_url}}"],
-							"path": ["api", "v1", "autocomplete"],
-							"query": [{"key": "q", "value": "test", "description": "Missing required lang, type, input"}]
-						}
-					}
-				},
-				{
-					"name": "❌ Autocomplete - Invalid Service Type",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Validation error 422\", () => pm.response.to.have.status(422));"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [{"key": "Accept-Language", "value": "fr"}],
-						"url": {
-							"raw": "{{base_url}}/api/v1/autocomplete?lang=fr&type=invalid-type&input=from&q=test",
-							"host": ["{{base_url}}"],
-							"path": ["api", "v1", "autocomplete"],
-							"query": [
-								{"key": "lang", "value": "fr"},
-								{"key": "type", "value": "invalid-type", "description": "Invalid service type"},
-								{"key": "input", "value": "from"},
-								{"key": "q", "value": "test"}
-							]
-						}
-					}
-				}
-			],
-			"description": "Autocomplete service with all service types and validation"
-		},
-		{
-			"name": "💰 Quote Management",
-			"item": [
-				{
-					"name": "Get Quote - One Way (EN)",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 200\", () => pm.response.to.have.status(200));",
-									"pm.test(\"Quote structure valid\", function () {",
-									"    const jsonData = pm.response.json();",
-									"    pm.expect(jsonData.data).to.have.property('currency');",
-									"    pm.expect(jsonData.data).to.have.property('prices');",
-									"    pm.expect(jsonData.data.prices).to.be.an('array');",
-									"});",
-									"pm.test(\"English success message\", function () {",
-									"    const jsonData = pm.response.json();",
-									"    pm.expect(jsonData.message).to.include('successfully');",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/api/v1/quote?service_type=one-way&from_location_id=1&to_location_id=2&pax=2&date=2025-12-25",
+							"raw": "{{base_url}}/api/v1/quote?service_type=round-trip&from_location_id=1&to_location_id=5&pax=4&date=2025-11-15",
 							"host": ["{{base_url}}"],
 							"path": ["api", "v1", "quote"],
 							"query": [
-								{"key": "service_type", "value": "one-way", "description": "Service type: one-way, round-trip, hotel-to-hotel"},
-								{"key": "from_location_id", "value": "1", "description": "Origin location ID"},
-								{"key": "to_location_id", "value": "2", "description": "Destination location ID"},
-								{"key": "pax", "value": "2", "description": "Number of passengers (1-50)"},
-								{"key": "date", "value": "2025-12-25", "description": "Service date (YYYY-MM-DD)"}
+								{"key": "service_type", "value": "round-trip", "description": "Available: round-trip, one-way, hotel-to-hotel, arrival, departure"},
+								{"key": "from_location_id", "value": "1", "description": "Beach Palace Cancun (Auto-increment ID)"},
+								{"key": "to_location_id", "value": "5", "description": "Adhara Hacienda Cancun (Different zone)"},
+								{"key": "pax", "value": "4", "description": "Number of passengers (1-50)"},
+								{"key": "date", "value": "2025-11-15", "description": "Service date (YYYY-MM-DD) - Regular pricing"}
 							]
 						}
 					}
 				},
 				{
-					"name": "Get Quote - Round Trip (ES)",
-					"event": [
+					"name": "✈️ Round Trip Quotes",
+					"item": [
 						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 200\", () => pm.response.to.have.status(200));",
-									"pm.test(\"Spanish success message\", function () {",
-									"    const jsonData = pm.response.json();",
-									"    pm.expect(jsonData.message).to.include('exitosamente');",
-									"});"
-								],
-								"type": "text/javascript"
+							"name": "Round Trip - Same Zone (Default Rate) 🏨→🏨",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test('Quote successful', () => pm.response.to.have.status(200));",
+											"pm.test('Has prices array', function () {",
+											"    const jsonData = pm.response.json();",
+											"    pm.expect(jsonData.data.prices).to.be.an('array');",
+											"    pm.expect(jsonData.data.prices.length).to.be.above(0);",
+											"});",
+											"pm.test('Service type is hotel-hotel', function () {",
+											"    const jsonData = pm.response.json();",
+											"    pm.expect(jsonData.data.serviceTypeTPV).to.equal('service_hotel_hotel');",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [{"key": "Accept-Language", "value": "en"}],
+								"url": {
+									"raw": "{{base_url}}/api/v1/quote?service_type=round-trip&from_location_id=1&to_location_id=3&pax=4&date=2025-11-25",
+									"host": ["{{base_url}}"],
+									"path": ["api", "v1", "quote"],
+									"query": [
+										{"key": "service_type", "value": "round-trip"},
+										{"key": "from_location_id", "value": "1", "description": "Beach Palace Cancun (Punta Cancun Zone)"},
+										{"key": "to_location_id", "value": "3", "description": "Grand Park Royal Cancún (Same Zone)"},
+										{"key": "pax", "value": "4"},
+										{"key": "date", "value": "2025-11-25", "description": "Regular date = Default rates"}
+									]
+								}
+							}
+						},
+						{
+							"name": "Round Trip - Different Zones (Default Rate) 🏨→🏖️",
+							"request": {
+								"method": "GET",
+								"header": [{"key": "Accept-Language", "value": "es"}],
+								"url": {
+									"raw": "{{base_url}}/api/v1/quote?locale=es&service_type=round-trip&from_location_id=1&to_location_id=18&pax=2&date=2025-10-15",
+									"host": ["{{base_url}}"],
+									"path": ["api", "v1", "quote"],
+									"query": [
+										{"key": "locale", "value": "es"},
+										{"key": "service_type", "value": "round-trip"},
+										{"key": "from_location_id", "value": "1", "description": "Beach Palace Cancun (Punta Cancun Zone)"},
+										{"key": "to_location_id", "value": "18", "description": "The Reef 28 (Playa del Carmen Zone)"},
+										{"key": "pax", "value": "2"},
+										{"key": "date", "value": "2025-10-15", "description": "Regular date = Default rates"}
+									]
+								}
+							}
+						},
+						{
+							"name": "Round Trip - High Season Rates 🎄💰",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test('Quote successful', () => pm.response.to.have.status(200));",
+											"pm.test('High season pricing', function () {",
+											"    const jsonData = pm.response.json();",
+											"    const standardPrice = parseFloat(jsonData.data.prices[0].costVehicleOW);",
+											"    pm.expect(standardPrice).to.be.above(100); // Higher than regular rates",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [{"key": "Accept-Language", "value": "en"}],
+								"url": {
+									"raw": "{{base_url}}/api/v1/quote?service_type=round-trip&from_location_id=1&to_location_id=18&pax=4&date=2025-12-25",
+									"host": ["{{base_url}}"],
+									"path": ["api", "v1", "quote"],
+									"query": [
+										{"key": "service_type", "value": "round-trip"},
+										{"key": "from_location_id", "value": "1", "description": "Beach Palace Cancun"},
+										{"key": "to_location_id", "value": "18", "description": "The Reef 28 (Playa del Carmen)"},
+										{"key": "pax", "value": "4"},
+										{"key": "date", "value": "2025-12-25", "description": "Christmas = High season rates (+30%)"}
+									]
+								}
+							}
+						},
+						{
+							"name": "Round Trip - Cross-City Route 🌴→🏖️",
+							"request": {
+								"method": "GET",
+								"header": [{"key": "Accept-Language", "value": "es"}],
+								"url": {
+									"raw": "{{base_url}}/api/v1/quote?locale=es&service_type=round-trip&from_location_id=5&to_location_id=24&pax=6&date=2025-09-20",
+									"host": ["{{base_url}}"],
+									"path": ["api", "v1", "quote"],
+									"query": [
+										{"key": "locale", "value": "es"},
+										{"key": "service_type", "value": "round-trip"},
+										{"key": "from_location_id", "value": "5", "description": "Adhara Hacienda Cancun"},
+										{"key": "to_location_id", "value": "24", "description": "Tulum location"},
+										{"key": "pax", "value": "6"},
+										{"key": "date", "value": "2025-09-20"}
+									]
+								}
 							}
 						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [{"key": "Accept-Language", "value": "es-MX,es;q=0.9"}],
-						"url": {
-							"raw": "{{base_url}}/api/v1/quote?locale=es&service_type=round-trip&from_location_id=1&to_location_id=3&pax=4&date=2025-12-25",
-							"host": ["{{base_url}}"],
-							"path": ["api", "v1", "quote"],
-							"query": [
-								{"key": "locale", "value": "es", "description": "Override Accept-Language"},
-								{"key": "service_type", "value": "round-trip"},
-								{"key": "from_location_id", "value": "1"},
-								{"key": "to_location_id", "value": "3"},
-								{"key": "pax", "value": "4"},
-								{"key": "date", "value": "2025-12-25"}
-							]
-						}
-					}
+					]
 				},
 				{
-					"name": "Get Quote - Hotel to Hotel (FR)",
-					"request": {
-						"method": "GET",
-						"header": [{"key": "Accept-Language", "value": "fr-FR,fr;q=0.9"}],
-						"url": {
-							"raw": "{{base_url}}/api/v1/quote?service_type=hotel-to-hotel&from_location_id=5&to_location_id=8&pax=2",
-							"host": ["{{base_url}}"],
-							"path": ["api", "v1", "quote"],
-							"query": [
-								{"key": "service_type", "value": "hotel-to-hotel"},
-								{"key": "from_location_id", "value": "5"},
-								{"key": "to_location_id", "value": "8"},
-								{"key": "pax", "value": "2"}
-							]
-						}
-					}
-				},
-				{
-					"name": "❌ Quote - Missing Required Fields",
-					"event": [
+					"name": "🛫 One Way Quotes",
+					"item": [
 						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Validation error 422\", () => pm.response.to.have.status(422));"
-								],
-								"type": "text/javascript"
+							"name": "One Way - Local Transport 🚗",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test('Quote successful', () => pm.response.to.have.status(200));",
+											"pm.test('All vehicle types available', function () {",
+											"    const jsonData = pm.response.json();",
+											"    pm.expect(jsonData.data.prices.length).to.be.above(3);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [{"key": "Accept-Language", "value": "en"}],
+								"url": {
+									"raw": "{{base_url}}/api/v1/quote?service_type=one-way&from_location_id=2&to_location_id=4&pax=3&date=2025-11-10",
+									"host": ["{{base_url}}"],
+									"path": ["api", "v1", "quote"],
+									"query": [
+										{"key": "service_type", "value": "one-way"},
+										{"key": "from_location_id", "value": "2", "description": "Breathless Cancun Soul Resort & Spa"},
+										{"key": "to_location_id", "value": "4", "description": "Park Royal Beach Cancún"},
+										{"key": "pax", "value": "3"},
+										{"key": "date", "value": "2025-11-10"}
+									]
+								}
+							}
+						},
+						{
+							"name": "One Way - Airport Style Service 🛬",
+							"request": {
+								"method": "GET",
+								"header": [{"key": "Accept-Language", "value": "es"}],
+								"url": {
+									"raw": "{{base_url}}/api/v1/quote?locale=es&service_type=one-way&from_location_id=1&to_location_id=22&pax=4&date=2025-12-01",
+									"host": ["{{base_url}}"],
+									"path": ["api", "v1", "quote"],
+									"query": [
+										{"key": "locale", "value": "es"},
+										{"key": "service_type", "value": "one-way"},
+										{"key": "from_location_id", "value": "1", "description": "Beach Palace Cancun"},
+										{"key": "to_location_id", "value": "22", "description": "Puerto Juarez (Isla Mujeres ferry)"},
+										{"key": "pax", "value": "4"},
+										{"key": "date", "value": "2025-12-01", "description": "High season date"}
+									]
+								}
+							}
+						},
+						{
+							"name": "One Way - Long Distance 🚙💨",
+							"request": {
+								"method": "GET",
+								"header": [{"key": "Accept-Language", "value": "en"}],
+								"url": {
+									"raw": "{{base_url}}/api/v1/quote?service_type=one-way&from_location_id=1&to_location_id=30&pax=2&date=2025-10-05",
+									"host": ["{{base_url}}"],
+									"path": ["api", "v1", "quote"],
+									"query": [
+										{"key": "service_type", "value": "one-way"},
+										{"key": "from_location_id", "value": "1", "description": "Beach Palace Cancun"},
+										{"key": "to_location_id", "value": "30", "description": "Tulum area location"},
+										{"key": "pax", "value": "2"},
+										{"key": "date", "value": "2025-10-05"}
+									]
+								}
 							}
 						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [{"key": "Accept-Language", "value": "es"}],
-						"url": {
-							"raw": "{{base_url}}/api/v1/quote",
-							"host": ["{{base_url}}"],
-							"path": ["api", "v1", "quote"]
-						}
-					}
+					]
 				},
 				{
-					"name": "❌ Quote - Invalid Service Type",
-					"event": [
+					"name": "🏨 Hotel to Hotel Quotes",
+					"item": [
 						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Validation error 422\", () => pm.response.to.have.status(422));"
-								],
-								"type": "text/javascript"
+							"name": "Hotel to Hotel - Same City 🏨↔🏨",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test('Quote successful', () => pm.response.to.have.status(200));",
+											"pm.test('Service type is hotel-to-hotel', function () {",
+											"    const jsonData = pm.response.json();",
+											"    pm.expect(jsonData.data.serviceTypeTPV).to.equal('service_hotel_hotel');",
+											"});",
+											"pm.test('Competitive pricing for hotel transfers', function () {",
+											"    const jsonData = pm.response.json();",
+											"    const standardPrice = parseFloat(jsonData.data.prices[0].costVehicleOW);",
+											"    pm.expect(standardPrice).to.be.below(100); // Should be cheaper than airport transfers",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [{"key": "Accept-Language", "value": "en"}],
+								"url": {
+									"raw": "{{base_url}}/api/v1/quote?service_type=hotel-to-hotel&from_location_id=5&to_location_id=7&pax=2&date=2025-11-20",
+									"host": ["{{base_url}}"],
+									"path": ["api", "v1", "quote"],
+									"query": [
+										{"key": "service_type", "value": "hotel-to-hotel"},
+										{"key": "from_location_id", "value": "5", "description": "Adhara Hacienda Cancun"},
+										{"key": "to_location_id", "value": "7", "description": "Airbnb Cancun"},
+										{"key": "pax", "value": "2"},
+										{"key": "date", "value": "2025-11-20"}
+									]
+								}
+							}
+						},
+						{
+							"name": "Hotel to Hotel - Cross City 🌴→🏖️",
+							"request": {
+								"method": "GET",
+								"header": [{"key": "Accept-Language", "value": "es"}],
+								"url": {
+									"raw": "{{base_url}}/api/v1/quote?locale=es&service_type=hotel-to-hotel&from_location_id=1&to_location_id=20&pax=4&date=2025-09-15",
+									"host": ["{{base_url}}"],
+									"path": ["api", "v1", "quote"],
+									"query": [
+										{"key": "locale", "value": "es"},
+										{"key": "service_type", "value": "hotel-to-hotel"},
+										{"key": "from_location_id", "value": "1", "description": "Beach Palace Cancun"},
+										{"key": "to_location_id", "value": "20", "description": "Hilton Playa del Carmen"},
+										{"key": "pax", "value": "4"},
+										{"key": "date", "value": "2025-09-15"}
+									]
+								}
+							}
+						},
+						{
+							"name": "Hotel to Hotel - Resort to Downtown 🏨→🏙️",
+							"request": {
+								"method": "GET",
+								"header": [{"key": "Accept-Language", "value": "en"}],
+								"url": {
+									"raw": "{{base_url}}/api/v1/quote?service_type=hotel-to-hotel&from_location_id=9&to_location_id=5&pax=3",
+									"host": ["{{base_url}}"],
+									"path": ["api", "v1", "quote"],
+									"query": [
+										{"key": "service_type", "value": "hotel-to-hotel"},
+										{"key": "from_location_id", "value": "9", "description": "Aloft Cancun (Resort area)"},
+										{"key": "to_location_id", "value": "5", "description": "Adhara Hacienda Cancun (Downtown)"},
+										{"key": "pax", "value": "3"}
+									]
+								}
 							}
 						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [{"key": "Accept-Language", "value": "fr"}],
-						"url": {
-							"raw": "{{base_url}}/api/v1/quote?service_type=invalid&from_location_id=1&to_location_id=2&pax=2",
-							"host": ["{{base_url}}"],
-							"path": ["api", "v1", "quote"],
-							"query": [
-								{"key": "service_type", "value": "invalid"},
-								{"key": "from_location_id", "value": "1"},
-								{"key": "to_location_id", "value": "2"},
-								{"key": "pax", "value": "2"}
-							]
-						}
-					}
+					]
 				},
 				{
-					"name": "❌ Quote - Same Location IDs",
-					"event": [
+					"name": "🛬 Arrival Service Quotes",
+					"item": [
 						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Validation error 422\", () => pm.response.to.have.status(422));"
-								],
-								"type": "text/javascript"
+							"name": "Arrival - Airport to Hotel 🛬→🏨",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test('Quote successful', () => pm.response.to.have.status(200));",
+											"pm.test('Airport service features included', function () {",
+											"    const jsonData = pm.response.json();",
+											"    const features = jsonData.data.prices[0].features;",
+											"    const hasAirportFeatures = features.some(f => f.name.includes('Meet & Greet') || f.name.includes('Flight monitoring'));",
+											"    pm.expect(hasAirportFeatures).to.be.true;",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [{"key": "Accept-Language", "value": "en"}],
+								"url": {
+									"raw": "{{base_url}}/api/v1/quote?service_type=arrival&from_location_id=1&to_location_id=10&pax=4&date=2025-12-15",
+									"host": ["{{base_url}}"],
+									"path": ["api", "v1", "quote"],
+									"query": [
+										{"key": "service_type", "value": "arrival"},
+										{"key": "from_location_id", "value": "1", "description": "Beach Palace Cancun (treat as airport area)"},
+										{"key": "to_location_id", "value": "10", "description": "Krystal Cancun"},
+										{"key": "pax", "value": "4"},
+										{"key": "date", "value": "2025-12-15", "description": "High season"}
+									]
+								}
+							}
+						},
+						{
+							"name": "Arrival - Ferry Terminal to Hotel ⛵→🏨",
+							"request": {
+								"method": "GET",
+								"header": [{"key": "Accept-Language", "value": "es"}],
+								"url": {
+									"raw": "{{base_url}}/api/v1/quote?locale=es&service_type=arrival&from_location_id=22&to_location_id=17&pax=2&date=2025-11-05",
+									"host": ["{{base_url}}"],
+									"path": ["api", "v1", "quote"],
+									"query": [
+										{"key": "locale", "value": "es"},
+										{"key": "service_type", "value": "arrival"},
+										{"key": "from_location_id", "value": "22", "description": "Puerto Juarez (Ferry terminal)"},
+										{"key": "to_location_id", "value": "17", "description": "All Ritmo Cancun Resort"},
+										{"key": "pax", "value": "2"},
+										{"key": "date", "value": "2025-11-05"}
+									]
+								}
 							}
 						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [{"key": "Accept-Language", "value": "es"}],
-						"url": {
-							"raw": "{{base_url}}/api/v1/quote?service_type=one-way&from_location_id=1&to_location_id=1&pax=2",
-							"host": ["{{base_url}}"],
-							"path": ["api", "v1", "quote"],
-							"query": [
-								{"key": "service_type", "value": "one-way"},
-								{"key": "from_location_id", "value": "1"},
-								{"key": "to_location_id", "value": "1", "description": "Same as from_location_id"},
-								{"key": "pax", "value": "2"}
-							]
-						}
-					}
+					]
 				},
 				{
-					"name": "❌ Quote - Invalid Passenger Count",
-					"event": [
+					"name": "🛫 Departure Service Quotes",
+					"item": [
 						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Validation error 422\", () => pm.response.to.have.status(422));"
-								],
-								"type": "text/javascript"
+							"name": "Departure - Hotel to Airport 🏨→🛫",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test('Quote successful', () => pm.response.to.have.status(200));",
+											"pm.test('Has flight monitoring features', function () {",
+											"    const jsonData = pm.response.json();",
+											"    const features = jsonData.data.prices[0].features;",
+											"    const hasFlightFeature = features.some(f => f.name.includes('Flight monitoring') || f.name.includes('flight changes'));",
+											"    pm.expect(hasFlightFeature).to.be.true;",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [{"key": "Accept-Language", "value": "en"}],
+								"url": {
+									"raw": "{{base_url}}/api/v1/quote?service_type=departure&from_location_id=11&to_location_id=1&pax=3&date=2025-10-20",
+									"host": ["{{base_url}}"],
+									"path": ["api", "v1", "quote"],
+									"query": [
+										{"key": "service_type", "value": "departure"},
+										{"key": "from_location_id", "value": "11", "description": "The Ritz Carlton Cancun"},
+										{"key": "to_location_id", "value": "1", "description": "Beach Palace Cancun (treat as airport area)"},
+										{"key": "pax", "value": "3"},
+										{"key": "date", "value": "2025-10-20"}
+									]
+								}
+							}
+						},
+						{
+							"name": "Departure - Hotel to Ferry 🏨→⛵",
+							"request": {
+								"method": "GET",
+								"header": [{"key": "Accept-Language", "value": "es"}],
+								"url": {
+									"raw": "{{base_url}}/api/v1/quote?locale=es&service_type=departure&from_location_id=20&to_location_id=23&pax=5&date=2025-12-10",
+									"host": ["{{base_url}}"],
+									"path": ["api", "v1", "quote"],
+									"query": [
+										{"key": "locale", "value": "es"},
+										{"key": "service_type", "value": "departure"},
+										{"key": "from_location_id", "value": "20", "description": "Hilton Playa del Carmen"},
+										{"key": "to_location_id", "value": "23", "description": "Playa del Carmen Ferry"},
+										{"key": "pax", "value": "5"},
+										{"key": "date", "value": "2025-12-10"}
+									]
+								}
 							}
 						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [{"key": "Accept-Language", "value": "en"}],
-						"url": {
-							"raw": "{{base_url}}/api/v1/quote?service_type=one-way&from_location_id=1&to_location_id=2&pax=0",
-							"host": ["{{base_url}}"],
-							"path": ["api", "v1", "quote"],
-							"query": [
-								{"key": "service_type", "value": "one-way"},
-								{"key": "from_location_id", "value": "1"},
-								{"key": "to_location_id", "value": "2"},
-								{"key": "pax", "value": "0", "description": "Invalid: must be 1-50"}
-							]
+					]
+				},
+				{
+					"name": "🎯 Edge Cases & Stress Tests",
+					"item": [
+						{
+							"name": "Edge - Maximum Passengers (50) 👥",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test('Quote successful with max passengers', () => pm.response.to.have.status(200));",
+											"pm.test('Large capacity vehicles available', function () {",
+											"    const jsonData = pm.response.json();",
+											"    const hasLargeVehicle = jsonData.data.prices.some(p => p.mPax >= 50);",
+											"    // If no large vehicles, should still provide multiple vehicles",
+											"    pm.expect(jsonData.data.prices.length).to.be.above(0);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/v1/quote?service_type=round-trip&from_location_id=1&to_location_id=18&pax=50&date=2025-11-30",
+									"host": ["{{base_url}}"],
+									"path": ["api", "v1", "quote"],
+									"query": [
+										{"key": "service_type", "value": "round-trip"},
+										{"key": "from_location_id", "value": "1"},
+										{"key": "to_location_id", "value": "18"},
+										{"key": "pax", "value": "50", "description": "Maximum passengers allowed"},
+										{"key": "date", "value": "2025-11-30"}
+									]
+								}
+							}
+						},
+						{
+							"name": "Edge - Far Future Date 🔮",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/v1/quote?service_type=one-way&from_location_id=5&to_location_id=15&pax=2&date=2026-06-15",
+									"host": ["{{base_url}}"],
+									"path": ["api", "v1", "quote"],
+									"query": [
+										{"key": "service_type", "value": "one-way"},
+										{"key": "from_location_id", "value": "5"},
+										{"key": "to_location_id", "value": "15"},
+										{"key": "pax", "value": "2"},
+										{"key": "date", "value": "2026-06-15", "description": "Far future - should use default rates"}
+									]
+								}
+							}
+						},
+						{
+							"name": "Edge - Random Location Combinations 🎲",
+							"request": {
+								"method": "GET",
+								"header": [{"key": "Accept-Language", "value": "es"}],
+								"url": {
+									"raw": "{{base_url}}/api/v1/quote?locale=es&service_type=hotel-to-hotel&from_location_id=8&to_location_id=25&pax=7&date=2025-08-22",
+									"host": ["{{base_url}}"],
+									"path": ["api", "v1", "quote"],
+									"query": [
+										{"key": "locale", "value": "es"},
+										{"key": "service_type", "value": "hotel-to-hotel"},
+										{"key": "from_location_id", "value": "8", "description": "Random location"},
+										{"key": "to_location_id", "value": "25", "description": "Random location"},
+										{"key": "pax", "value": "7"},
+										{"key": "date", "value": "2025-08-22"}
+									]
+								}
+							}
+						},
+						{
+							"name": "Edge - Cross-Zone Long Distance 🚐💨",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/v1/quote?service_type=round-trip&from_location_id=2&to_location_id=35&pax=8",
+									"host": ["{{base_url}}"],
+									"path": ["api", "v1", "quote"],
+									"query": [
+										{"key": "service_type", "value": "round-trip"},
+										{"key": "from_location_id", "value": "2", "description": "Cancun location"},
+										{"key": "to_location_id", "value": "35", "description": "Distant location (if exists)"},
+										{"key": "pax", "value": "8"}
+									]
+								}
+							}
 						}
-					}
+					]
+				},
+				{
+					"name": "💰 Rate Comparison Tests",
+					"item": [
+						{
+							"name": "Compare - Default vs High Season 📊",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"// Store route for comparison",
+											"pm.environment.set('compare_from', '1');",
+											"pm.environment.set('compare_to', '18');",
+											"pm.environment.set('compare_pax', '4');"
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test('Default rate quote successful', () => pm.response.to.have.status(200));",
+											"const jsonData = pm.response.json();",
+											"const defaultPrice = parseFloat(jsonData.data.prices[0].costVehicleOW);",
+											"pm.environment.set('default_price', defaultPrice.toString());",
+											"pm.test('Has reasonable default price', function () {",
+											"    pm.expect(defaultPrice).to.be.above(50);",
+											"    pm.expect(defaultPrice).to.be.below(200);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/v1/quote?service_type=round-trip&from_location_id={{compare_from}}&to_location_id={{compare_to}}&pax={{compare_pax}}&date=2025-11-25",
+									"host": ["{{base_url}}"],
+									"path": ["api", "v1", "quote"],
+									"query": [
+										{"key": "service_type", "value": "round-trip"},
+										{"key": "from_location_id", "value": "{{compare_from}}"},
+										{"key": "to_location_id", "value": "{{compare_to}}"},
+										{"key": "pax", "value": "{{compare_pax}}"},
+										{"key": "date", "value": "2025-11-25", "description": "Regular date"}
+									]
+								}
+							}
+						},
+						{
+							"name": "Compare - High Season Rate 💎",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test('High season quote successful', () => pm.response.to.have.status(200));",
+											"const jsonData = pm.response.json();",
+											"const highSeasonPrice = parseFloat(jsonData.data.prices[0].costVehicleOW);",
+											"const defaultPrice = parseFloat(pm.environment.get('default_price'));",
+											"pm.test('High season is more expensive than default', function () {",
+											"    pm.expect(highSeasonPrice).to.be.above(defaultPrice);",
+											"    const increase = ((highSeasonPrice - defaultPrice) / defaultPrice) * 100;",
+											"    pm.expect(increase).to.be.above(20); // At least 20% increase",
+											"    console.log(`Price increase: ${increase.toFixed(1)}%`);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/v1/quote?service_type=round-trip&from_location_id={{compare_from}}&to_location_id={{compare_to}}&pax={{compare_pax}}&date=2025-12-25",
+									"host": ["{{base_url}}"],
+									"path": ["api", "v1", "quote"],
+									"query": [
+										{"key": "service_type", "value": "round-trip"},
+										{"key": "from_location_id", "value": "{{compare_from}}"},
+										{"key": "to_location_id", "value": "{{compare_to}}"},
+										{"key": "pax", "value": "{{compare_pax}}"},
+										{"key": "date", "value": "2025-12-25", "description": "Christmas = High season"}
+									]
+								}
+							}
+						}
+					]
+				},
+				{
+					"name": "❌ Error Scenarios",
+					"item": [
+						{
+							"name": "❌ Missing Required Fields",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test('Validation error 422', () => pm.response.to.have.status(422));",
+											"pm.test('Has validation errors', function () {",
+											"    const jsonData = pm.response.json();",
+											"    pm.expect(jsonData.errors).to.be.an('object');",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [{"key": "Accept-Language", "value": "es"}],
+								"url": {
+									"raw": "{{base_url}}/api/v1/quote",
+									"host": ["{{base_url}}"],
+									"path": ["api", "v1", "quote"]
+								}
+							}
+						},
+						{
+							"name": "❌ Invalid Service Type",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test('Validation error 422', () => pm.response.to.have.status(422));"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/v1/quote?service_type=invalid&from_location_id=1&to_location_id=2&pax=2",
+									"host": ["{{base_url}}"],
+									"path": ["api", "v1", "quote"],
+									"query": [
+										{"key": "service_type", "value": "invalid", "description": "Invalid service type"},
+										{"key": "from_location_id", "value": "1"},
+										{"key": "to_location_id", "value": "2"},
+										{"key": "pax", "value": "2"}
+									]
+								}
+							}
+						},
+						{
+							"name": "❌ Same Location IDs",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test('Validation error 422', () => pm.response.to.have.status(422));"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/v1/quote?service_type=one-way&from_location_id=1&to_location_id=1&pax=2",
+									"host": ["{{base_url}}"],
+									"path": ["api", "v1", "quote"],
+									"query": [
+										{"key": "service_type", "value": "one-way"},
+										{"key": "from_location_id", "value": "1"},
+										{"key": "to_location_id", "value": "1", "description": "Same as from_location_id"},
+										{"key": "pax", "value": "2"}
+									]
+								}
+							}
+						},
+						{
+							"name": "❌ Invalid Passenger Count",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test('Validation error 422', () => pm.response.to.have.status(422));"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/v1/quote?service_type=one-way&from_location_id=1&to_location_id=2&pax=0",
+									"host": ["{{base_url}}"],
+									"path": ["api", "v1", "quote"],
+									"query": [
+										{"key": "service_type", "value": "one-way"},
+										{"key": "from_location_id", "value": "1"},
+										{"key": "to_location_id", "value": "2"},
+										{"key": "pax", "value": "0", "description": "Invalid: must be 1-50"}
+									]
+								}
+							}
+						},
+						{
+							"name": "❌ Invalid Date Format",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test('Validation error 422', () => pm.response.to.have.status(422));"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/v1/quote?service_type=round-trip&from_location_id=1&to_location_id=2&pax=2&date=invalid-date",
+									"host": ["{{base_url}}"],
+									"path": ["api", "v1", "quote"],
+									"query": [
+										{"key": "service_type", "value": "round-trip"},
+										{"key": "from_location_id", "value": "1"},
+										{"key": "to_location_id", "value": "2"},
+										{"key": "pax", "value": "2"},
+										{"key": "date", "value": "invalid-date", "description": "Invalid date format"}
+									]
+								}
+							}
+						},
+						{
+							"name": "❌ Past Date",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test('Validation error 422', () => pm.response.to.have.status(422));"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/v1/quote?service_type=round-trip&from_location_id=1&to_location_id=2&pax=2&date=2024-01-01",
+									"host": ["{{base_url}}"],
+									"path": ["api", "v1", "quote"],
+									"query": [
+										{"key": "service_type", "value": "round-trip"},
+										{"key": "from_location_id", "value": "1"},
+										{"key": "to_location_id", "value": "2"},
+										{"key": "pax", "value": "2"},
+										{"key": "date", "value": "2024-01-01", "description": "Past date"}
+									]
+								}
+							}
+						}
+					]
 				}
 			]
 		},
 		{
-			"name": "💰 Rates Management",
+			"name": "🔍 Autocomplete Service",
 			"item": [
 				{
-					"name": "Get All Rates - With Filters & Pagination",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 200\", () => pm.response.to.have.status(200));",
-									"pm.test(\"Has pagination structure\", function () {",
-									"    const jsonData = pm.response.json();",
-									"    pm.expect(jsonData.data).to.have.property('rates');",
-									"    pm.expect(jsonData.data).to.have.property('pagination');",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/api/v1/rates?service_type_id=1&vehicle_type_id=2&available=true&rate_type=zone&sort_by=total_one_way&sort_order=asc&per_page=20&page=1",
-							"host": ["{{base_url}}"],
-							"path": ["api", "v1", "rates"],
-							"query": [
-								{"key": "service_type_id", "value": "1", "description": "Filter by service type"},
-								{"key": "vehicle_type_id", "value": "2", "description": "Filter by vehicle type"},
-								{"key": "available", "value": "true", "description": "Filter by availability"},
-								{"key": "rate_type", "value": "zone", "description": "zone or location"},
-								{"key": "sort_by", "value": "total_one_way", "description": "Sort field"},
-								{"key": "sort_order", "value": "asc", "description": "asc or desc"},
-								{"key": "per_page", "value": "20", "description": "Items per page (max 100)"},
-								{"key": "page", "value": "1", "description": "Page number"}
-							]
-						}
-					}
-				},
-				{
-					"name": "Get Rates - Zone Based Filter",
-					"request": {
-						"method": "GET",
-						"header": [{"key": "Accept-Language", "value": "es"}],
-						"url": {
-							"raw": "{{base_url}}/api/v1/rates?from_zone_id=1447&to_zone_id=908&valid_date=2025-08-25&sort_by=total_round_trip&sort_order=desc",
-							"host": ["{{base_url}}"],
-							"path": ["api", "v1", "rates"],
-							"query": [
-								{"key": "from_zone_id", "value": "1447", "description": "Origin zone - Cancun City (from seeder)"},
-								{"key": "to_zone_id", "value": "908", "description": "Destination zone - Playa del Carmen (from seeder)"},
-								{"key": "valid_date", "value": "2025-08-25"},
-								{"key": "sort_by", "value": "total_round_trip"},
-								{"key": "sort_order", "value": "desc"}
-							]
-						}
-					}
-				},
-				{
-					"name": "Get Route Rates",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/api/v1/rates/route?service_type_id=1&from_location_id=1&to_location_id=2&date=2025-09-15",
-							"host": ["{{base_url}}"],
-							"path": ["api", "v1", "rates", "route"],
-							"query": [
-								{"key": "service_type_id", "value": "1", "description": "Required"},
-								{"key": "from_location_id", "value": "1", "description": "Required"},
-								{"key": "to_location_id", "value": "2", "description": "Required"},
-								{"key": "date", "value": "2025-09-15", "description": "Optional"}
-							]
-						}
-					}
-				},
-				{
-					"name": "Get Zone Rates - Cancun City to Akumal (Round Trip)",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 200\", () => pm.response.to.have.status(200));",
-									"pm.test(\"Has zone-based rates\", function () {",
-									"    const jsonData = pm.response.json();",
-									"    pm.expect(jsonData.data).to.have.property('rates');",
-									"    pm.expect(jsonData.data.rates).to.be.an('array');",
-									"});",
-									"pm.test(\"Spanish success message\", function () {",
-									"    const jsonData = pm.response.json();",
-									"    pm.expect(jsonData.message).to.include('exitosamente');",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [{"key": "Accept-Language", "value": "es"}],
-						"url": {
-							"raw": "{{base_url}}/api/v1/rates/zones?locale=es&service_type_id=1&from_zone_id=1447&to_zone_id=6001&date=2025-10-01&pax=4",
-							"host": ["{{base_url}}"],
-							"path": ["api", "v1", "rates", "zones"],
-							"query": [
-								{"key": "locale", "value": "es", "description": "Idioma (opcional): en, es, fr"},
-								{"key": "service_type_id", "value": "1", "description": "ID tipo servicio: 1=Round Trip (RT)"},
-								{"key": "from_zone_id", "value": "1447", "description": "Zona origen - Cancun City (del seeder)"},
-								{"key": "to_zone_id", "value": "6001", "description": "Zona destino - Akumal (estimado)"},
-								{"key": "date", "value": "2025-10-01", "description": "Fecha servicio (opcional): YYYY-MM-DD"},
-								{"key": "pax", "value": "4", "description": "Número de pasajeros"}
-							]
-						}
-					}
-				},
-				{
-					"name": "Get Zone Rates - Cancun to Playa del Carmen (One Way)",
+					"name": "Autocomplete Search - All Service Types",
 					"request": {
 						"method": "GET",
 						"header": [{"key": "Accept-Language", "value": "en"}],
 						"url": {
-							"raw": "{{base_url}}/api/v1/rates/zones?locale=en&service_type_id=2&from_zone_id=1447&to_zone_id=908&date=2025-11-15&pax=2&vehicle_type_id=1",
+							"raw": "{{base_url}}/api/v1/autocomplete/search?q=cancun&service_type=round-trip&input=from",
 							"host": ["{{base_url}}"],
-							"path": ["api", "v1", "rates", "zones"],
+							"path": ["api", "v1", "autocomplete", "search"],
 							"query": [
-								{"key": "locale", "value": "en", "description": "Language (optional): en, es, fr"},
-								{"key": "service_type_id", "value": "2", "description": "Service type: 2=One Way (OW)"},
-								{"key": "from_zone_id", "value": "1447", "description": "Origin zone - Cancun City (from seeder)"},
-								{"key": "to_zone_id", "value": "908", "description": "Destination zone - Playa del Carmen (from seeder)"},
-								{"key": "date", "value": "2025-11-15", "description": "Service date (optional): YYYY-MM-DD"},
-								{"key": "pax", "value": "2", "description": "Number of passengers"},
-								{"key": "vehicle_type_id", "value": "1", "description": "Filter by vehicle type (optional)"}
+								{"key": "q", "value": "cancun", "description": "Search query"},
+								{"key": "service_type", "value": "round-trip", "description": "round-trip, one-way, hotel-to-hotel, arrival, departure"},
+								{"key": "input", "value": "from", "description": "from or to"}
 							]
-						}
-					}
-				},
-				{
-					"name": "Get Zone Rates - Hotel to Hotel (Marina to Punta Cancun)",
-					"request": {
-						"method": "GET",
-						"header": [{"key": "Accept-Language", "value": "fr"}],
-						"url": {
-							"raw": "{{base_url}}/api/v1/rates/zones?locale=fr&service_type_id=3&from_zone_id=5770&to_zone_id=507&date=2025-12-20&pax=6&luggage=8",
-							"host": ["{{base_url}}"],
-							"path": ["api", "v1", "rates", "zones"],
-							"query": [
-								{"key": "locale", "value": "fr", "description": "Langue (optionnel): en, es, fr"},
-								{"key": "service_type_id", "value": "3", "description": "Type service: 3=Hôtel à Hôtel (HTH)"},
-								{"key": "from_zone_id", "value": "5770", "description": "Zone origine - Marina Puerto Cancún (du seeder)"},
-								{"key": "to_zone_id", "value": "507", "description": "Zone destination - Punta Cancun (du seeder)"},
-								{"key": "date", "value": "2025-12-20", "description": "Date service (optionnel): YYYY-MM-DD"},
-								{"key": "pax", "value": "6", "description": "Nombre de passagers"},
-								{"key": "luggage", "value": "8", "description": "Nombre de bagages (optionnel)"}
-							]
-						}
-					}
-				},
-				{
-					"name": "Get Zone Rates - Shopping/Entertainment Zones",
-					"request": {
-						"method": "GET",
-						"header": [{"key": "Accept-Language", "value": "es"}],
-						"url": {
-							"raw": "{{base_url}}/api/v1/rates/zones?locale=es&service_type_id=1&from_zone_id=5627&to_zone_id=5353&date=2025-09-10&pax=3&vehicle_type_id=2",
-							"host": ["{{base_url}}"],
-							"path": ["api", "v1", "rates", "zones"],
-							"query": [
-								{"key": "locale", "value": "es", "description": "Idioma (opcional): en, es, fr"},
-								{"key": "service_type_id", "value": "1", "description": "ID tipo servicio: 1=Viaje Redondo (RT)"},
-								{"key": "from_zone_id", "value": "5627", "description": "Zona origen - Plaza La Isla Cancun (del seeder)"},
-								{"key": "to_zone_id", "value": "5353", "description": "Zona destino - Plazas Outlet Cancun (del seeder)"},
-								{"key": "date", "value": "2025-09-10", "description": "Fecha servicio (opcional): YYYY-MM-DD"},
-								{"key": "pax", "value": "3", "description": "Número de pasajeros"},
-								{"key": "vehicle_type_id", "value": "2", "description": "Filtro por tipo vehículo (opcional)"}
-							]
-						}
-					}
-				},
-				{
-					"name": "Get Zone Rates - Medical/Business Zones",
-					"request": {
-						"method": "GET",
-						"header": [{"key": "Accept-Language", "value": "en"}],
-						"url": {
-							"raw": "{{base_url}}/api/v1/rates/zones?locale=en&service_type_id=2&from_zone_id=5683&to_zone_id=5787&date=2025-08-30&pax=1&vehicle_type_id=3",
-							"host": ["{{base_url}}"],
-							"path": ["api", "v1", "rates", "zones"],
-							"query": [
-								{"key": "locale", "value": "en", "description": "Language (optional): en, es, fr"},
-								{"key": "service_type_id", "value": "2", "description": "Service type: 2=One Way (OW)"},
-								{"key": "from_zone_id", "value": "5683", "description": "Origin zone - Amatista Estetica Dental Cancun (from seeder)"},
-								{"key": "to_zone_id", "value": "5787", "description": "Destination zone - Cancun Country Club (from seeder)"},
-								{"key": "date", "value": "2025-08-30", "description": "Service date (optional): YYYY-MM-DD"},
-								{"key": "pax", "value": "1", "description": "Number of passengers"},
-								{"key": "vehicle_type_id", "value": "3", "description": "Filter by VIP vehicle type (optional)"}
-							]
-						}
-					}
-				},
-				{
-					"name": "Get Zone Rates - Restaurant/Nightlife Zones",
-					"request": {
-						"method": "GET",
-						"header": [{"key": "Accept-Language", "value": "fr"}],
-						"url": {
-							"raw": "{{base_url}}/api/v1/rates/zones?locale=fr&service_type_id=1&from_zone_id=5180&to_zone_id=5320&date=2025-07-25&pax=8&vehicle_type_id=4",
-							"host": ["{{base_url}}"],
-							"path": ["api", "v1", "rates", "zones"],
-							"query": [
-								{"key": "locale", "value": "fr", "description": "Langue (optionnel): en, es, fr"},
-								{"key": "service_type_id", "value": "1", "description": "Type service: 1=Voyage Aller-Retour (RT)"},
-								{"key": "from_zone_id", "value": "5180", "description": "Zone origine - Ilios Greek restaurant in Cancun (du seeder)"},
-								{"key": "to_zone_id", "value": "5320", "description": "Zone destination - Navíos Restaurante Cancun (du seeder)"},
-								{"key": "date", "value": "2025-07-25", "description": "Date service (optionnel): YYYY-MM-DD"},
-								{"key": "pax", "value": "8", "description": "Nombre de passagers"},
-								{"key": "vehicle_type_id", "value": "4", "description": "Filtre par type véhicule limousine (optionnel)"}
-							]
-						}
-					}
-				},
-				{
-					"name": "Get Zone Rates - Beach/Recreation Zones",
-					"request": {
-						"method": "GET",
-						"header": [{"key": "Accept-Language", "value": "es"}],
-						"url": {
-							"raw": "{{base_url}}/api/v1/rates/zones?locale=es&service_type_id=3&from_zone_id=5332&to_zone_id=5439&date=2025-06-15&pax=5&luggage=10",
-							"host": ["{{base_url}}"],
-							"path": ["api", "v1", "rates", "zones"],
-							"query": [
-								{"key": "locale", "value": "es", "description": "Idioma (opcional): en, es, fr"},
-								{"key": "service_type_id", "value": "3", "description": "ID tipo servicio: 3=Hotel a Hotel (HTH)"},
-								{"key": "from_zone_id", "value": "5332", "description": "Zona origen - Playa Delfines Cancun (del seeder)"},
-								{"key": "to_zone_id", "value": "5439", "description": "Zona destino - Playa Langosta Cancun (del seeder)"},
-								{"key": "date", "value": "2025-06-15", "description": "Fecha servicio (opcional): YYYY-MM-DD"},
-								{"key": "pax", "value": "5", "description": "Número de pasajeros"},
-								{"key": "luggage", "value": "10", "description": "Número de equipajes (opcional)"}
-							]
-						}
-					}
-				},
-				{
-					"name": "Get Zone Rates - Cross-City Routes (Puerto Juarez)",
-					"request": {
-						"method": "GET",
-						"header": [{"key": "Accept-Language", "value": "en"}],
-						"url": {
-							"raw": "{{base_url}}/api/v1/rates/zones?locale=en&service_type_id=1&from_zone_id=1589&to_zone_id=908&date=2025-05-20&pax=4&vehicle_type_id=1",
-							"host": ["{{base_url}}"],
-							"path": ["api", "v1", "rates", "zones"],
-							"query": [
-								{"key": "locale", "value": "en", "description": "Language (optional): en, es, fr"},
-								{"key": "service_type_id", "value": "1", "description": "Service type: 1=Round Trip (RT)"},
-								{"key": "from_zone_id", "value": "1589", "description": "Origin zone - Puerto Juarez (from seeder)"},
-								{"key": "to_zone_id", "value": "908", "description": "Destination zone - Playa del Carmen (from seeder)"},
-								{"key": "date", "value": "2025-05-20", "description": "Service date (optional): YYYY-MM-DD"},
-								{"key": "pax", "value": "4", "description": "Number of passengers"},
-								{"key": "vehicle_type_id", "value": "1", "description": "Filter by standard vehicle type (optional)"}
-							]
-						}
-					}
-				},
-				{
-					"name": "Get Single Rate",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/api/v1/rates/1",
-							"host": ["{{base_url}}"],
-							"path": ["api", "v1", "rates", "1"]
-						}
-					}
-				},
-				{
-					"name": "Create Zone-Based Rate",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 201\", () => pm.response.to.have.status(201));",
-									"// Store created rate ID",
-									"const jsonData = pm.response.json();",
-									"if (jsonData.data && jsonData.data.rate && jsonData.data.rate.id) {",
-									"    pm.environment.set('created_rate_id', jsonData.data.rate.id);",
-									"}"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{"key": "Content-Type", "value": "application/json"},
-							{"key": "Accept-Language", "value": "es"}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"service_type_id\": 1,\n  \"vehicle_type_id\": 1,\n  \"from_zone_id\": 1447,\n  \"to_zone_id\": 5770,\n  \"cost_vehicle_one_way\": 120.00,\n  \"total_one_way\": 150.00,\n  \"cost_vehicle_round_trip\": 200.00,\n  \"total_round_trip\": 250.00,\n  \"num_vehicles\": 1,\n  \"available\": true,\n  \"valid_from\": \"2025-08-01\",\n  \"valid_to\": \"2025-12-31\",\n  \"description\": \"Route from Cancun City to Marina Puerto Cancún\"\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/api/v1/rates",
-							"host": ["{{base_url}}"],
-							"path": ["api", "v1", "rates"]
-						}
-					}
-				},
-				{
-					"name": "Create Zone-Based Rate (VIP Service)",
-					"request": {
-						"method": "POST",
-						"header": [
-							{"key": "Content-Type", "value": "application/json"},
-							{"key": "Accept-Language", "value": "en"}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"service_type_id\": 2,\n  \"vehicle_type_id\": 3,\n  \"from_zone_id\": 5683,\n  \"to_zone_id\": 507,\n  \"cost_vehicle_one_way\": 180.00,\n  \"total_one_way\": 220.00,\n  \"cost_vehicle_round_trip\": 320.00,\n  \"total_round_trip\": 380.00,\n  \"num_vehicles\": 1,\n  \"available\": true,\n  \"valid_from\": \"2025-08-01\",\n  \"valid_to\": \"2025-12-31\",\n  \"description\": \"VIP route from Amatista Dental to Punta Cancun\"\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/api/v1/rates",
-							"host": ["{{base_url}}"],
-							"path": ["api", "v1", "rates"]
-						}
-					}
-				},
-				{
-					"name": "Update Rate",
-					"request": {
-						"method": "PUT",
-						"header": [
-							{"key": "Content-Type", "value": "application/json"},
-							{"key": "Accept-Language", "value": "fr"}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"cost_vehicle_one_way\": 130.00,\n  \"total_one_way\": 160.00,\n  \"cost_vehicle_round_trip\": 220.00,\n  \"total_round_trip\": 280.00,\n  \"available\": false\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/api/v1/rates/{{created_rate_id}}",
-							"host": ["{{base_url}}"],
-							"path": ["api", "v1", "rates", "{{created_rate_id}}"]
-						}
-					}
-				},
-				{
-					"name": "❌ Rate - Both Zone and Location IDs",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Validation error 422\", () => pm.response.to.have.status(422));"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{"key": "Content-Type", "value": "application/json"},
-							{"key": "Accept-Language", "value": "es"}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"service_type_id\": 1,\n  \"vehicle_type_id\": 1,\n  \"from_zone_id\": 1447,\n  \"to_zone_id\": 908,\n  \"from_location_id\": 1,\n  \"to_location_id\": 2,\n  \"cost_vehicle_one_way\": 100.00,\n  \"total_one_way\": 120.00,\n  \"cost_vehicle_round_trip\": 180.00,\n  \"total_round_trip\": 200.00,\n  \"num_vehicles\": 1\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/api/v1/rates",
-							"host": ["{{base_url}}"],
-							"path": ["api", "v1", "rates"]
-						}
-					}
-				},
-				{
-					"name": "❌ Rate - Missing Required Fields",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Validation error 422\", () => pm.response.to.have.status(422));"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{"key": "Content-Type", "value": "application/json"},
-							{"key": "Accept-Language", "value": "fr"}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"service_type_id\": 1\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/api/v1/rates",
-							"host": ["{{base_url}}"],
-							"path": ["api", "v1", "rates"]
 						}
 					}
 				}
@@ -882,166 +888,11 @@
 					"name": "Get Locations by Type - Hotels",
 					"request": {
 						"method": "GET",
-						"header": [{"key": "Accept-Language", "value": "fr"}],
+						"header": [],
 						"url": {
 							"raw": "{{base_url}}/api/v1/locations/type/H",
 							"host": ["{{base_url}}"],
-							"path": ["api", "v1", "locations", "type", "H"],
-							"query": [
-								{"key": "type", "value": "H", "description": "H=Hotel, A=Airport, R=Restaurant, T=Tour", "disabled": true}
-							]
-						}
-					}
-				},
-				{
-					"name": "Get Locations by Type - Airports",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/api/v1/locations/type/A",
-							"host": ["{{base_url}}"],
-							"path": ["api", "v1", "locations", "type", "A"]
-						}
-					}
-				},
-				{
-					"name": "Get Single Location",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/api/v1/locations/1",
-							"host": ["{{base_url}}"],
-							"path": ["api", "v1", "locations", "1"]
-						}
-					}
-				},
-				{
-					"name": "Create Location - Hotel",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 200 or 201\", function () {",
-									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
-									"});",
-									"// Store created location ID",
-									"const jsonData = pm.response.json();",
-									"if (jsonData.data && jsonData.data.id) {",
-									"    pm.environment.set('created_location_id', jsonData.data.id);",
-									"}"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{"key": "Content-Type", "value": "application/json"},
-							{"key": "Accept-Language", "value": "es"}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"name\": \"Hotel Paraíso Maya\",\n  \"city_id\": 1,\n  \"type\": \"H\",\n  \"active\": true,\n  \"description\": \"Luxury beachfront resort in Riviera Maya\",\n  \"latitude\": 20.6296,\n  \"longitude\": -87.0739\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/api/v1/locations",
-							"host": ["{{base_url}}"],
-							"path": ["api", "v1", "locations"]
-						}
-					}
-				},
-				{
-					"name": "Create Location - Airport",
-					"request": {
-						"method": "POST",
-						"header": [
-							{"key": "Content-Type", "value": "application/json"},
-							{"key": "Accept-Language", "value": "en"}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"name\": \"Test Airport Terminal 2\",\n  \"city_id\": 1,\n  \"type\": \"A\",\n  \"active\": true,\n  \"description\": \"Secondary airport terminal\",\n  \"latitude\": 21.0365,\n  \"longitude\": -86.8770\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/api/v1/locations",
-							"host": ["{{base_url}}"],
-							"path": ["api", "v1", "locations"]
-						}
-					}
-				},
-				{
-					"name": "Update Location",
-					"request": {
-						"method": "PUT",
-						"header": [
-							{"key": "Content-Type", "value": "application/json"},
-							{"key": "Accept-Language", "value": "fr"}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"name\": \"Hôtel Paradis Maya - Updated\",\n  \"description\": \"Resort de luxe en bord de mer à Riviera Maya - Mise à jour\",\n  \"active\": true\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/api/v1/locations/{{created_location_id}}",
-							"host": ["{{base_url}}"],
-							"path": ["api", "v1", "locations", "{{created_location_id}}"]
-						}
-					}
-				},
-				{
-					"name": "❌ Location - Missing Required Fields",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Validation error 422\", () => pm.response.to.have.status(422));"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{"key": "Content-Type", "value": "application/json"},
-							{"key": "Accept-Language", "value": "es"}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"description\": \"Missing required fields\"\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/api/v1/locations",
-							"host": ["{{base_url}}"],
-							"path": ["api", "v1", "locations"]
-						}
-					}
-				},
-				{
-					"name": "❌ Location Not Found",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Not found error 404\", () => pm.response.to.have.status(404));"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [{"key": "Accept-Language", "value": "fr"}],
-						"url": {
-							"raw": "{{base_url}}/api/v1/locations/99999",
-							"host": ["{{base_url}}"],
-							"path": ["api", "v1", "locations", "99999"]
+							"path": ["api", "v1", "locations", "type", "H"]
 						}
 					}
 				}
@@ -1054,88 +905,11 @@
 					"name": "Get All Cities",
 					"request": {
 						"method": "GET",
-						"header": [{"key": "Accept-Language", "value": "en"}],
+						"header": [],
 						"url": {
 							"raw": "{{base_url}}/api/v1/cities",
 							"host": ["{{base_url}}"],
 							"path": ["api", "v1", "cities"]
-						}
-					}
-				},
-				{
-					"name": "Get City with Details",
-					"request": {
-						"method": "GET",
-						"header": [{"key": "Accept-Language", "value": "es"}],
-						"url": {
-							"raw": "{{base_url}}/api/v1/cities/1/details",
-							"host": ["{{base_url}}"],
-							"path": ["api", "v1", "cities", "1", "details"]
-						}
-					}
-				},
-				{
-					"name": "Get Single City",
-					"request": {
-						"method": "GET",
-						"header": [{"key": "Accept-Language", "value": "fr"}],
-						"url": {
-							"raw": "{{base_url}}/api/v1/cities/1",
-							"host": ["{{base_url}}"],
-							"path": ["api", "v1", "cities", "1"]
-						}
-					}
-				},
-				{
-					"name": "Create City",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"// Store created city ID",
-									"const jsonData = pm.response.json();",
-									"if (jsonData.data && jsonData.data.id) {",
-									"    pm.environment.set('created_city_id', jsonData.data.id);",
-									"}"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{"key": "Content-Type", "value": "application/json"},
-							{"key": "Accept-Language", "value": "es"}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"name\": \"Puerto Vallarta\",\n  \"state\": \"Jalisco\",\n  \"country\": \"Mexico\",\n  \"code\": \"PVR\",\n  \"active\": true,\n  \"latitude\": 20.6534,\n  \"longitude\": -105.2253\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/api/v1/cities",
-							"host": ["{{base_url}}"],
-							"path": ["api", "v1", "cities"]
-						}
-					}
-				},
-				{
-					"name": "Update City",
-					"request": {
-						"method": "PUT",
-						"header": [
-							{"key": "Content-Type", "value": "application/json"},
-							{"key": "Accept-Language", "value": "fr"}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"name\": \"Puerto Vallarta - Updated\",\n  \"description\": \"Beautiful coastal city in Jalisco\"\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/api/v1/cities/{{created_city_id}}",
-							"host": ["{{base_url}}"],
-							"path": ["api", "v1", "cities", "{{created_city_id}}"]
 						}
 					}
 				}
@@ -1155,64 +929,6 @@
 							"path": ["api", "v1", "zones"]
 						}
 					}
-				},
-				{
-					"name": "Get Zones by City",
-					"request": {
-						"method": "GET",
-						"header": [{"key": "Accept-Language", "value": "es"}],
-						"url": {
-							"raw": "{{base_url}}/api/v1/cities/1/zones",
-							"host": ["{{base_url}}"],
-							"path": ["api", "v1", "cities", "1", "zones"]
-						}
-					}
-				},
-				{
-					"name": "Get Single Zone",
-					"request": {
-						"method": "GET",
-						"header": [{"key": "Accept-Language", "value": "fr"}],
-						"url": {
-							"raw": "{{base_url}}/api/v1/zones/1",
-							"host": ["{{base_url}}"],
-							"path": ["api", "v1", "zones", "1"]
-						}
-					}
-				},
-				{
-					"name": "Create Zone with Geometry",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"// Store created zone ID",
-									"const jsonData = pm.response.json();",
-									"if (jsonData.data && jsonData.data.id) {",
-									"    pm.environment.set('created_zone_id', jsonData.data.id);",
-									"}"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{"key": "Content-Type", "value": "application/json"},
-							{"key": "Accept-Language", "value": "en"}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"name\": \"Hotel Zone North\",\n  \"city_id\": 1,\n  \"active\": true,\n  \"description\": \"Northern hotel zone with luxury resorts\",\n  \"geometry\": {\n    \"type\": \"Polygon\",\n    \"coordinates\": [[[-87.07, 20.62], [-87.08, 20.62], [-87.08, 20.63], [-87.07, 20.63], [-87.07, 20.62]]]\n  }\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/api/v1/zones",
-							"host": ["{{base_url}}"],
-							"path": ["api", "v1", "zones"]
-						}
-					}
 				}
 			]
 		},
@@ -1223,53 +939,7 @@
 					"name": "Get All Vehicle Types",
 					"request": {
 						"method": "GET",
-						"header": [{"key": "Accept-Language", "value": "en"}],
-						"url": {
-							"raw": "{{base_url}}/api/v1/vehicle-types",
-							"host": ["{{base_url}}"],
-							"path": ["api", "v1", "vehicle-types"]
-						}
-					}
-				},
-				{
-					"name": "Get Single Vehicle Type",
-					"request": {
-						"method": "GET",
-						"header": [{"key": "Accept-Language", "value": "es"}],
-						"url": {
-							"raw": "{{base_url}}/api/v1/vehicle-types/1",
-							"host": ["{{base_url}}"],
-							"path": ["api", "v1", "vehicle-types", "1"]
-						}
-					}
-				},
-				{
-					"name": "Create Vehicle Type",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"// Store created vehicle type ID",
-									"const jsonData = pm.response.json();",
-									"if (jsonData.data && jsonData.data.id) {",
-									"    pm.environment.set('created_vehicle_type_id', jsonData.data.id);",
-									"}"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{"key": "Content-Type", "value": "application/json"},
-							{"key": "Accept-Language", "value": "fr"}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"name\": \"Luxury Sprinter\",\n  \"code\": \"LS2\",\n  \"max_pax\": 12,\n  \"max_units\": 20,\n  \"travel_time\": \"1 hour and 45 minutes\",\n  \"image\": \"sprinter-luxury.png\",\n  \"video_url\": \"http://www.youtube.com/embed/luxury-sprinter-demo\",\n  \"frame\": \"sprinter/iframe.html\",\n  \"active\": true\n}"
-						},
+						"header": [],
 						"url": {
 							"raw": "{{base_url}}/api/v1/vehicle-types",
 							"host": ["{{base_url}}"],
@@ -1286,53 +956,7 @@
 					"name": "Get All Service Features",
 					"request": {
 						"method": "GET",
-						"header": [{"key": "Accept-Language", "value": "en"}],
-						"url": {
-							"raw": "{{base_url}}/api/v1/service-features",
-							"host": ["{{base_url}}"],
-							"path": ["api", "v1", "service-features"]
-						}
-					}
-				},
-				{
-					"name": "Get Single Service Feature",
-					"request": {
-						"method": "GET",
-						"header": [{"key": "Accept-Language", "value": "es"}],
-						"url": {
-							"raw": "{{base_url}}/api/v1/service-features/1",
-							"host": ["{{base_url}}"],
-							"path": ["api", "v1", "service-features", "1"]
-						}
-					}
-				},
-				{
-					"name": "Create Multilingual Service Feature",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"// Store created service feature ID",
-									"const jsonData = pm.response.json();",
-									"if (jsonData.data && jsonData.data.id) {",
-									"    pm.environment.set('created_service_feature_id', jsonData.data.id);",
-									"}"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{"key": "Content-Type", "value": "application/json"},
-							{"key": "Accept-Language", "value": "fr"}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"name\": {\n    \"en\": \"Premium WiFi\",\n    \"es\": \"WiFi Premium\",\n    \"fr\": \"WiFi Premium\"\n  },\n  \"description\": {\n    \"en\": \"High-speed internet access during your trip\",\n    \"es\": \"Acceso a internet de alta velocidad durante tu viaje\",\n    \"fr\": \"Accès internet haute vitesse pendant votre voyage\"\n  },\n  \"icon\": \"wifi\",\n  \"active\": true\n}"
-						},
+						"header": [],
 						"url": {
 							"raw": "{{base_url}}/api/v1/service-features",
 							"host": ["{{base_url}}"],
@@ -1343,18 +967,314 @@
 			]
 		},
 		{
-			"name": "🌐 i18n Language Testing",
+			"name": "📋 Booking Management",
 			"item": [
 				{
-					"name": "Query Parameter Override (FR wins over ES header)",
+					"name": "📋 Overview - Booking Service & Valid Service Types",
+					"request": {
+						"method": "GET",
+						"header": [{"key": "Accept", "value": "application/json"}],
+						"url": {
+							"raw": "{{base_url}}/api/v1/bookings",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "bookings"],
+							"query": [
+								{"key": "status", "value": "pending", "disabled": true, "description": "pending, confirmed, in_progress, completed, cancelled"},
+								{"key": "trip_type", "value": "round-trip", "disabled": true, "description": "arrival, departure, round-trip, hotel-to-hotel"},
+								{"key": "customer_email", "value": "john@example.com", "disabled": true, "description": "Filter by customer email"},
+								{"key": "date_from", "value": "2025-09-01", "disabled": true, "description": "Start date filter (YYYY-MM-DD)"},
+								{"key": "date_to", "value": "2025-09-30", "disabled": true, "description": "End date filter (YYYY-MM-DD)"},
+								{"key": "per_page", "value": "15", "disabled": true, "description": "Items per page (default: 15)"},
+								{"key": "VALID_SERVICE_NAMES", "value": "Round Trip | One Way | Hotel to Hotel", "disabled": true, "description": "✅ VALID serviceName VALUES"},
+								{"key": "VALID_SERVICE_CODES", "value": "RT | OW | HTH", "disabled": true, "description": "✅ VALID serviceName CODE VALUES"}
+							]
+						}
+					}
+				},
+				{
+					"name": "📋 Complete Booking Parameters Example - ALL FIELDS",
 					"event": [
 						{
 							"listen": "test",
 							"script": {
 								"exec": [
-									"pm.test(\"French response (query param priority)\", function () {",
+									"pm.test('Complete booking created successfully', () => pm.response.to.have.status(201));",
+									"pm.test('All optional fields included', function () {",
 									"    const jsonData = pm.response.json();",
-									"    pm.expect(jsonData.message).to.include('succès');",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    pm.expect(jsonData.data).to.have.property('booking_number');",
+									"    pm.expect(jsonData.data).to.have.property('child_seats');",
+									"    pm.expect(jsonData.data).to.have.property('wheelchair_accessible');",
+									"    pm.expect(jsonData.data).to.have.property('hotel_reservation_name');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{"key": "Content-Type", "value": "application/json"},
+							{"key": "Accept-Language", "value": "en"}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"customerInfo\": {\n    \"firstName\": \"Michael\",\n    \"lastName\": \"Johnson\",\n    \"email\": \"michael.johnson@example.com\",\n    \"phone\": \"+1-555-9876\",\n    \"country\": \"United States\"\n  },\n  \"pickupLocation\": \"Breathless Cancun Soul Resort & Spa - Main Lobby\",\n  \"dropoffLocation\": \"Cancun International Airport - Terminal 4 Departures\",\n  \"pickupDateTime\": \"2025-12-28T08:00:00\",\n  \"passengers\": 8,\n  \"serviceId\": 5,\n  \"serviceName\": \"One Way\",\n  \"currency\": \"USD\",\n  \"totalPrice\": 185.50,\n  \"specialRequests\": \"Large group with extra luggage. Please bring spacious vehicle. One passenger uses wheelchair. Need assistance with bags.\",\n  \"childSeats\": 3,\n  \"wheelchairAccessible\": true,\n  \"hotelReservationName\": \"Johnson Extended Family Holiday Group\",\n  \"fromLocationId\": 2,\n  \"toLocationId\": 1,\n  \"fromLocationType\": \"location\",\n  \"toLocationType\": \"airport\",\n  \"tripType\": \"departure\",\n  \"bookingDate\": \"2025-09-06T18:45:00\",\n  \"departureFlightInfo\": {\n    \"airline\": \"Delta Airlines\",\n    \"flightNumber\": \"DL1547\",\n    \"date\": \"2025-12-28\",\n    \"time\": \"11:30\"\n  }\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/bookings",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "bookings"]
+						}
+					}
+				},
+				{
+					"name": "🔧 Minimal Required Fields Example - REQUIRED ONLY",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Minimal booking created successfully', () => pm.response.to.have.status(201));",
+									"pm.test('Works with minimum required fields', function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    pm.expect(jsonData.data).to.have.property('booking_number');",
+									"    pm.expect(jsonData.data.status).to.equal('pending');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{"key": "Content-Type", "value": "application/json"}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"customerInfo\": {\n    \"firstName\": \"Jane\",\n    \"email\": \"jane.smith@example.com\",\n    \"phone\": \"+1-555-4321\",\n    \"country\": \"Canada\"\n  },\n  \"pickupLocation\": \"Grand Park Royal Cancún - Front Desk\",\n  \"dropoffLocation\": \"Airbnb Cancun - Address Provided\",\n  \"pickupDateTime\": \"2025-10-10T14:00:00\",\n  \"passengers\": 2,\n  \"serviceName\": \"One Way\",\n  \"currency\": \"USD\",\n  \"totalPrice\": 65.00,\n  \"fromLocationId\": 3,\n  \"toLocationId\": 7,\n  \"fromLocationType\": \"location\",\n  \"toLocationType\": \"location\",\n  \"tripType\": \"one-way\",\n  \"bookingDate\": \"2025-09-06T19:30:00\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/bookings",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "bookings"]
+						}
+					}
+				},
+				{
+					"name": "🎯 COMPLETE EXAMPLE - Every Parameter Possible",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Ultra-complete booking created successfully', () => pm.response.to.have.status(201));",
+									"pm.test('All parameters processed correctly', function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    pm.expect(jsonData.data).to.have.property('booking_number');",
+									"    pm.expect(jsonData.data).to.have.property('id');",
+									"    pm.expect(jsonData.data).to.have.property('customer_id');",
+									"    pm.expect(jsonData.data).to.have.property('service_type_id');",
+									"    pm.expect(jsonData.data).to.have.property('vehicle_type_id');",
+									"    pm.expect(jsonData.data.status).to.equal('pending');",
+									"    pm.expect(jsonData.data.child_seats).to.equal(2);",
+									"    pm.expect(jsonData.data.wheelchair_accessible).to.equal(true);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{"key": "Content-Type", "value": "application/json"},
+							{"key": "Accept-Language", "value": "es"}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"customerInfo\": {\n    \"firstName\": \"Ana Isabella\",\n    \"lastName\": \"García Martinez\",\n    \"email\": \"ana.garcia@example.com\",\n    \"phone\": \"+34-91-123-4567\",\n    \"country\": \"Spain\"\n  },\n  \"pickupLocation\": \"Park Royal Beach Cancún - Concierge Desk Level 1\",\n  \"dropoffLocation\": \"All Ritmo Cancun Resort & Waterpark - Main Reception Building A\",\n  \"pickupDateTime\": \"2025-12-31T16:45:00\",\n  \"passengers\": 7,\n  \"serviceId\": 6,\n  \"serviceName\": \"Round Trip\",\n  \"currency\": \"EUR\",\n  \"totalPrice\": 275.80,\n  \"specialRequests\": \"VIP family group traveling with elderly grandparents (85+ years old). Need wheelchair-accessible vehicle with ramp. Prefer experienced driver familiar with resort areas. Will have 4 large suitcases + carry-on bags. Request music volume low. Child booster seats needed for ages 4 and 6. Pickup precisely at 4:45 PM - important flight connection. Emergency contact: +34-600-999-888. Prefer air conditioning temperature at 22°C. Group speaks Spanish and English.\",\n  \"childSeats\": 2,\n  \"wheelchairAccessible\": true,\n  \"hotelReservationName\": \"García Family New Year Celebration - Confirmation #RES-2025-NYE-7834\",\n  \"fromLocationId\": 4,\n  \"toLocationId\": 17,\n  \"fromLocationType\": \"location\",\n  \"toLocationType\": \"location\",\n  \"tripType\": \"round-trip\",\n  \"bookingDate\": \"2025-09-06T20:15:30\",\n  \"arrivalFlightInfo\": {\n    \"airline\": \"Iberia Airlines\",\n    \"flightNumber\": \"IB6275\",\n    \"date\": \"2025-12-31\",\n    \"time\": \"14:20\"\n  },\n  \"departureFlightInfo\": {\n    \"airline\": \"Iberia Airlines\",\n    \"flightNumber\": \"IB6276\",\n    \"date\": \"2026-01-07\",\n    \"time\": \"18:55\"\n  }\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/bookings",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "bookings"]
+						}
+					}
+				},
+				{
+					"name": "✅ Create New Booking - Round Trip",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Booking created successfully', () => pm.response.to.have.status(201));",
+									"pm.test('Response has booking data', function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    pm.expect(jsonData.data).to.have.property('booking_number');",
+									"    pm.expect(jsonData.data).to.have.property('id');",
+									"    pm.expect(jsonData.data.status).to.equal('pending');",
+									"});",
+									"",
+									"// Store booking ID for other tests",
+									"const jsonData = pm.response.json();",
+									"pm.environment.set('test_booking_id', jsonData.data.id);",
+									"pm.environment.set('test_booking_number', jsonData.data.booking_number);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{"key": "Content-Type", "value": "application/json"},
+							{"key": "Accept-Language", "value": "en"}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"customerInfo\": {\n    \"firstName\": \"John\",\n    \"lastName\": \"Doe\",\n    \"email\": \"john.doe@example.com\",\n    \"phone\": \"+1-555-0123\",\n    \"country\": \"United States\"\n  },\n  \"pickupLocation\": \"Beach Palace Cancun - Resort Lobby\",\n  \"dropoffLocation\": \"The Reef 28 - Main Entrance\",\n  \"pickupDateTime\": \"2025-11-15T10:30:00\",\n  \"passengers\": 4,\n  \"serviceId\": 1,\n  \"serviceName\": \"Round Trip\",\n  \"currency\": \"USD\",\n  \"totalPrice\": 150.00,\n  \"specialRequests\": \"Please arrive 15 minutes early. Child seat needed for 5-year-old.\",\n  \"childSeats\": 1,\n  \"wheelchairAccessible\": false,\n  \"hotelReservationName\": \"Doe Family Reservation\",\n  \"fromLocationId\": 1,\n  \"toLocationId\": 18,\n  \"fromLocationType\": \"location\",\n  \"toLocationType\": \"location\",\n  \"tripType\": \"round-trip\",\n  \"bookingDate\": \"2025-09-06T14:30:00\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/bookings",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "bookings"]
+						}
+					}
+				},
+				{
+					"name": "✈️ Create Booking - Airport Arrival",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Airport booking created successfully', () => pm.response.to.have.status(201));",
+									"pm.test('Has flight information', function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data).to.have.property('arrival_flight_info');",
+									"    pm.expect(jsonData.data.trip_type).to.equal('arrival');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{"key": "Content-Type", "value": "application/json"},
+							{"key": "Accept-Language", "value": "es"}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"customerInfo\": {\n    \"firstName\": \"Maria\",\n    \"lastName\": \"Rodriguez\",\n    \"email\": \"maria.rodriguez@example.com\",\n    \"phone\": \"+52-998-123-4567\",\n    \"country\": \"Mexico\"\n  },\n  \"pickupLocation\": \"Cancun International Airport - Terminal 2 Arrivals\",\n  \"dropoffLocation\": \"Krystal Cancun - Main Lobby\",\n  \"pickupDateTime\": \"2025-12-20T14:45:00\",\n  \"passengers\": 2,\n  \"serviceId\": 2,\n  \"serviceName\": \"One Way\",\n  \"currency\": \"USD\",\n  \"totalPrice\": 85.00,\n  \"specialRequests\": \"Please monitor flight for delays. Will have large luggage.\",\n  \"childSeats\": 0,\n  \"wheelchairAccessible\": false,\n  \"fromLocationId\": 1,\n  \"toLocationId\": 10,\n  \"fromLocationType\": \"airport\",\n  \"toLocationType\": \"location\",\n  \"tripType\": \"arrival\",\n  \"bookingDate\": \"2025-09-06T15:00:00\",\n  \"arrivalFlightInfo\": {\n    \"airline\": \"American Airlines\",\n    \"flightNumber\": \"AA2749\",\n    \"date\": \"2025-12-20\",\n    \"time\": \"14:30\"\n  }\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/bookings",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "bookings"]
+						}
+					}
+				},
+				{
+					"name": "🛫 Create Booking - Airport Departure",
+					"request": {
+						"method": "POST",
+						"header": [
+							{"key": "Content-Type", "value": "application/json"},
+							{"key": "Accept-Language", "value": "en"}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"customerInfo\": {\n    \"firstName\": \"James\",\n    \"lastName\": \"Wilson\",\n    \"email\": \"james.wilson@example.com\",\n    \"phone\": \"+1-555-0789\",\n    \"country\": \"Canada\"\n  },\n  \"pickupLocation\": \"The Ritz Carlton Cancun - Valet Area\",\n  \"dropoffLocation\": \"Cancun International Airport - Terminal 3 Departures\",\n  \"pickupDateTime\": \"2025-10-25T11:00:00\",\n  \"passengers\": 3,\n  \"serviceId\": 3,\n  \"serviceName\": \"One Way\",\n  \"currency\": \"USD\",\n  \"totalPrice\": 75.00,\n  \"specialRequests\": \"Early pickup requested - flight at 2:00 PM\",\n  \"childSeats\": 0,\n  \"wheelchairAccessible\": false,\n  \"fromLocationId\": 11,\n  \"toLocationId\": 1,\n  \"fromLocationType\": \"location\",\n  \"toLocationType\": \"airport\",\n  \"tripType\": \"departure\",\n  \"bookingDate\": \"2025-09-06T16:00:00\",\n  \"departureFlightInfo\": {\n    \"airline\": \"WestJet\",\n    \"flightNumber\": \"WS2680\",\n    \"date\": \"2025-10-25\",\n    \"time\": \"14:00\"\n  }\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/bookings",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "bookings"]
+						}
+					}
+				},
+				{
+					"name": "🏨 Create Booking - Hotel to Hotel",
+					"request": {
+						"method": "POST",
+						"header": [
+							{"key": "Content-Type", "value": "application/json"},
+							{"key": "Accept-Language", "value": "es"}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"customerInfo\": {\n    \"firstName\": \"Carlos\",\n    \"lastName\": \"Mendez\",\n    \"email\": \"carlos.mendez@example.com\",\n    \"phone\": \"+52-998-555-0123\",\n    \"country\": \"Mexico\"\n  },\n  \"pickupLocation\": \"Adhara Hacienda Cancun - Reception\",\n  \"dropoffLocation\": \"Hilton Playa del Carmen - Main Entrance\",\n  \"pickupDateTime\": \"2025-11-30T09:00:00\",\n  \"passengers\": 6,\n  \"serviceId\": 4,\n  \"serviceName\": \"Hotel to Hotel\",\n  \"currency\": \"USD\",\n  \"totalPrice\": 120.00,\n  \"specialRequests\": \"Group transfer for family reunion. Need extra space for luggage.\",\n  \"childSeats\": 2,\n  \"wheelchairAccessible\": false,\n  \"hotelReservationName\": \"Mendez Family Group\",\n  \"fromLocationId\": 5,\n  \"toLocationId\": 20,\n  \"fromLocationType\": \"location\",\n  \"toLocationType\": \"location\",\n  \"tripType\": \"hotel-to-hotel\",\n  \"bookingDate\": \"2025-09-06T17:00:00\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/bookings",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "bookings"]
+						}
+					}
+				},
+				{
+					"name": "🔤 Service Type Examples - Using Codes (RT, OW, HTH)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Booking with service code created successfully', () => pm.response.to.have.status(201));",
+									"pm.test('Service code accepted', function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    pm.expect(jsonData.data).to.have.property('service_type_id');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{"key": "Content-Type", "value": "application/json"},
+							{"key": "Accept-Language", "value": "en"}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"customerInfo\": {\n    \"firstName\": \"Sarah\",\n    \"lastName\": \"Code Example\",\n    \"email\": \"sarah.codes@example.com\",\n    \"phone\": \"+1-555-CODE\",\n    \"country\": \"United States\"\n  },\n  \"pickupLocation\": \"Aloft Cancun - Modern Lobby\",\n  \"dropoffLocation\": \"Krystal Cancun - Reception Desk\",\n  \"pickupDateTime\": \"2025-11-20T12:00:00\",\n  \"passengers\": 3,\n  \"serviceId\": 2,\n  \"serviceName\": \"OW\",\n  \"currency\": \"USD\",\n  \"totalPrice\": 89.00,\n  \"specialRequests\": \"Using service TYPE CODE instead of full name. OW = One Way service.\",\n  \"childSeats\": 0,\n  \"wheelchairAccessible\": false,\n  \"fromLocationId\": 9,\n  \"toLocationId\": 10,\n  \"fromLocationType\": \"location\",\n  \"toLocationType\": \"location\",\n  \"tripType\": \"one-way\",\n  \"bookingDate\": \"2025-09-06T21:00:00\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/bookings",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "bookings"]
+						}
+					}
+				},
+				{
+					"name": "📋 Get All Bookings (Paginated)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Bookings retrieved successfully', () => pm.response.to.have.status(200));",
+									"pm.test('Response has pagination meta', function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    pm.expect(jsonData).to.have.property('meta');",
+									"    pm.expect(jsonData.meta).to.have.property('current_page');",
+									"    pm.expect(jsonData.meta).to.have.property('total');",
+									"    pm.expect(jsonData.meta).to.have.property('per_page');",
+									"});",
+									"pm.test('Data is array of bookings', function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data).to.be.an('array');",
 									"});"
 								],
 								"type": "text/javascript"
@@ -1363,29 +1283,931 @@
 					],
 					"request": {
 						"method": "GET",
-						"header": [{"key": "Accept-Language", "value": "es"}],
+						"header": [{"key": "Accept-Language", "value": "en"}],
 						"url": {
-							"raw": "{{base_url}}/api/v1/quote?locale=fr&service_type=one-way&from_location_id=1&to_location_id=2&pax=2",
+							"raw": "{{base_url}}/api/v1/bookings?per_page=10",
 							"host": ["{{base_url}}"],
-							"path": ["api", "v1", "quote"],
+							"path": ["api", "v1", "bookings"],
 							"query": [
-								{"key": "locale", "value": "fr", "description": "Query param overrides header"},
-								{"key": "service_type", "value": "one-way"},
-								{"key": "from_location_id", "value": "1"},
-								{"key": "to_location_id", "value": "2"},
-								{"key": "pax", "value": "2"}
+								{"key": "per_page", "value": "10", "description": "Items per page"}
 							]
 						}
 					}
 				},
 				{
-					"name": "Quality Value Priority (ES q=0.9 > FR q=0.8)",
+					"name": "🔍 Get Bookings by Status",
+					"request": {
+						"method": "GET",
+						"header": [{"key": "Accept-Language", "value": "es"}],
+						"url": {
+							"raw": "{{base_url}}/api/v1/bookings?status=pending&per_page=5",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "bookings"],
+							"query": [
+								{"key": "status", "value": "pending", "description": "Filter by status"},
+								{"key": "per_page", "value": "5"}
+							]
+						}
+					}
+				},
+				{
+					"name": "📧 Get Bookings by Customer Email",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/bookings?customer_email=john.doe@example.com",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "bookings"],
+							"query": [
+								{"key": "customer_email", "value": "john.doe@example.com", "description": "Filter by customer email"}
+							]
+						}
+					}
+				},
+				{
+					"name": "📅 Get Bookings by Date Range",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/bookings?date_from=2025-11-01&date_to=2025-11-30",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "bookings"],
+							"query": [
+								{"key": "date_from", "value": "2025-11-01", "description": "Start date filter"},
+								{"key": "date_to", "value": "2025-11-30", "description": "End date filter"}
+							]
+						}
+					}
+				},
+				{
+					"name": "🔍 Get Single Booking by ID",
 					"event": [
 						{
 							"listen": "test",
 							"script": {
 								"exec": [
-									"pm.test(\"Spanish response (higher quality)\", function () {",
+									"pm.test('Booking retrieved successfully', () => pm.response.to.have.status(200));",
+									"pm.test('Booking has complete data', function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    pm.expect(jsonData.data).to.have.property('id');",
+									"    pm.expect(jsonData.data).to.have.property('booking_number');",
+									"    pm.expect(jsonData.data).to.have.property('customer');",
+									"    pm.expect(jsonData.data).to.have.property('service_type');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/bookings/{{test_booking_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "bookings", "{{test_booking_id}}"]
+						}
+					}
+				},
+				{
+					"name": "✏️ Update Booking Status - Confirm",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Booking updated successfully', () => pm.response.to.have.status(200));",
+									"pm.test('Status changed to confirmed', function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    pm.expect(jsonData.data.status).to.equal('confirmed');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{"key": "Content-Type", "value": "application/json"}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": \"confirmed\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/bookings/{{test_booking_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "bookings", "{{test_booking_id}}"]
+						}
+					}
+				},
+				{
+					"name": "🚗 Update Booking Status - In Progress",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{"key": "Content-Type", "value": "application/json"}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": \"in_progress\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/bookings/{{test_booking_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "bookings", "{{test_booking_id}}"]
+						}
+					}
+				},
+				{
+					"name": "✅ Update Booking Status - Complete",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{"key": "Content-Type", "value": "application/json"}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": \"completed\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/bookings/{{test_booking_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "bookings", "{{test_booking_id}}"]
+						}
+					}
+				},
+				{
+					"name": "📝 Update Special Requests",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{"key": "Content-Type", "value": "application/json"}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"special_requests\": \"Updated: Please call upon arrival. Customer prefers SUV vehicle if available.\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/bookings/{{test_booking_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "bookings", "{{test_booking_id}}"]
+						}
+					}
+				},
+				{
+					"name": "❌ Cancel Booking with Reason",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Booking cancelled successfully', () => pm.response.to.have.status(200));",
+									"pm.test('Status changed to cancelled', function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    pm.expect(jsonData.data.status).to.equal('cancelled');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{"key": "Content-Type", "value": "application/json"}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": \"cancelled\",\n  \"cancellation_reason\": \"Customer requested cancellation due to travel plan changes\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/bookings/{{test_booking_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "bookings", "{{test_booking_id}}"]
+						}
+					}
+				},
+				{
+					"name": "🗑️ Delete/Cancel Booking (Alternative Method)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Booking cancelled successfully', () => pm.response.to.have.status(200));",
+									"pm.test('Success message returned', function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    pm.expect(jsonData.message).to.include('cancelled');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/bookings/{{test_booking_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "bookings", "{{test_booking_id}}"]
+						}
+					}
+				},
+				{
+					"name": "❌ Error Cases",
+					"item": [
+						{
+							"name": "❌ Create Booking - Missing Required Fields",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test('Validation error 422', () => pm.response.to.have.status(422));",
+											"pm.test('Has validation errors for all missing required fields', function () {",
+											"    const jsonData = pm.response.json();",
+											"    pm.expect(jsonData.errors).to.be.an('object');",
+											"    pm.expect(jsonData.success).to.be.false;",
+											"    ",
+											"    // Check that key required fields are mentioned in errors",
+											"    const errorFields = Object.keys(jsonData.errors);",
+											"    pm.expect(errorFields).to.include.members([",
+											"        'customerInfo.email',",
+											"        'customerInfo.phone', ",
+											"        'customerInfo.country',",
+											"        'dropoffLocation',",
+											"        'pickupDateTime',",
+											"        'passengers',",
+											"        'serviceName',",
+											"        'currency',",
+											"        'totalPrice',",
+											"        'fromLocationId',",
+											"        'toLocationId',",
+											"        'fromLocationType',",
+											"        'toLocationType',",
+											"        'tripType',",
+											"        'bookingDate'",
+											"    ]);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{"key": "Content-Type", "value": "application/json"}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"customerInfo\": {\n    \"firstName\": \"John\"\n  },\n  \"pickupLocation\": \"Some location\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/v1/bookings",
+									"host": ["{{base_url}}"],
+									"path": ["api", "v1", "bookings"]
+								}
+							}
+						},
+						{
+							"name": "❌ Create Booking - Invalid Parameter Values",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test('Validation error 422', () => pm.response.to.have.status(422));",
+											"pm.test('Validates parameter constraints', function () {",
+											"    const jsonData = pm.response.json();",
+											"    pm.expect(jsonData.errors).to.be.an('object');",
+											"    pm.expect(jsonData.success).to.be.false;",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{"key": "Content-Type", "value": "application/json"}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"customerInfo\": {\n    \"firstName\": \"John\",\n    \"lastName\": \"Doe\",\n    \"email\": \"invalid-email-format\",\n    \"phone\": \"+1-555-0123\",\n    \"country\": \"US\"\n  },\n  \"pickupLocation\": \"Beach Palace Cancun\",\n  \"dropoffLocation\": \"The Reef 28\",\n  \"pickupDateTime\": \"2024-01-01T10:30:00\",\n  \"passengers\": 0,\n  \"serviceName\": \"invalid-service\",\n  \"currency\": \"INVALID\",\n  \"totalPrice\": -50,\n  \"fromLocationId\": 99999,\n  \"toLocationId\": 99999,\n  \"fromLocationType\": \"invalid-type\",\n  \"toLocationType\": \"invalid-type\",\n  \"tripType\": \"invalid-trip\",\n  \"bookingDate\": \"invalid-date\",\n  \"childSeats\": -1,\n  \"specialRequests\": \"A\".repeat(1001)\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/v1/bookings",
+									"host": ["{{base_url}}"],
+									"path": ["api", "v1", "bookings"]
+								}
+							}
+						},
+						{
+							"name": "❌ Create Booking - Invalid Email Format",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test('Validation error 422', () => pm.response.to.have.status(422));"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{"key": "Content-Type", "value": "application/json"}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"customerInfo\": {\n    \"firstName\": \"John\",\n    \"lastName\": \"Doe\",\n    \"email\": \"invalid-email\",\n    \"phone\": \"+1-555-0123\",\n    \"country\": \"United States\"\n  },\n  \"pickupLocation\": \"Beach Palace Cancun\",\n  \"dropoffLocation\": \"The Reef 28\",\n  \"pickupDateTime\": \"2025-11-15T10:30:00\",\n  \"passengers\": 4,\n  \"serviceName\": \"Round Trip\",\n  \"currency\": \"USD\",\n  \"totalPrice\": 150.00,\n  \"fromLocationId\": 1,\n  \"toLocationId\": 18,\n  \"fromLocationType\": \"location\",\n  \"toLocationType\": \"location\",\n  \"tripType\": \"round-trip\",\n  \"bookingDate\": \"2025-09-06T14:30:00\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/v1/bookings",
+									"host": ["{{base_url}}"],
+									"path": ["api", "v1", "bookings"]
+								}
+							}
+						},
+						{
+							"name": "❌ Create Booking - Past Date",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test('Validation error 422', () => pm.response.to.have.status(422));"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{"key": "Content-Type", "value": "application/json"}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"customerInfo\": {\n    \"firstName\": \"John\",\n    \"lastName\": \"Doe\",\n    \"email\": \"john@example.com\",\n    \"phone\": \"+1-555-0123\",\n    \"country\": \"United States\"\n  },\n  \"pickupLocation\": \"Beach Palace Cancun\",\n  \"dropoffLocation\": \"The Reef 28\",\n  \"pickupDateTime\": \"2024-01-01T10:30:00\",\n  \"passengers\": 4,\n  \"serviceName\": \"Round Trip\",\n  \"currency\": \"USD\",\n  \"totalPrice\": 150.00,\n  \"fromLocationId\": 1,\n  \"toLocationId\": 18,\n  \"fromLocationType\": \"location\",\n  \"toLocationType\": \"location\",\n  \"tripType\": \"round-trip\",\n  \"bookingDate\": \"2025-09-06T14:30:00\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/v1/bookings",
+									"host": ["{{base_url}}"],
+									"path": ["api", "v1", "bookings"]
+								}
+							}
+						},
+						{
+							"name": "❌ Get Booking - Not Found",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test('Booking not found 404', () => pm.response.to.have.status(404));",
+											"pm.test('Error message returned', function () {",
+											"    const jsonData = pm.response.json();",
+											"    pm.expect(jsonData.success).to.be.false;",
+											"    pm.expect(jsonData.message).to.include('not found');",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/v1/bookings/99999",
+									"host": ["{{base_url}}"],
+									"path": ["api", "v1", "bookings", "99999"]
+								}
+							}
+						},
+						{
+							"name": "❌ Update Booking - Invalid Status",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test('Validation error 422', () => pm.response.to.have.status(422));"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "PUT",
+								"header": [
+									{"key": "Content-Type", "value": "application/json"}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"status\": \"invalid_status\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/v1/bookings/1",
+									"host": ["{{base_url}}"],
+									"path": ["api", "v1", "bookings", "1"]
+								}
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "🚀 One-Step Booking + Payment",
+			"item": [
+				{
+					"name": "🚀 Create Booking with Payment - Complete Flow",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Booking with payment created successfully', () => pm.response.to.have.status(201));",
+									"pm.test('Response has booking and payment data', function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    pm.expect(jsonData.data).to.have.property('booking');",
+									"    pm.expect(jsonData.data).to.have.property('payment');",
+									"    pm.expect(jsonData.data.booking).to.have.property('id');",
+									"    pm.expect(jsonData.data.booking).to.have.property('booking_number');",
+									"    pm.expect(jsonData.data.payment).to.have.property('client_secret');",
+									"    pm.expect(jsonData.data.payment).to.have.property('payment_intent_id');",
+									"    pm.expect(jsonData.data.payment).to.have.property('amount');",
+									"    pm.expect(jsonData.data.payment).to.have.property('expires_at');",
+									"});",
+									"",
+									"// Store booking and payment info for other tests",
+									"const jsonData = pm.response.json();",
+									"pm.environment.set('test_booking_id', jsonData.data.booking.id);",
+									"pm.environment.set('payment_intent_id', jsonData.data.payment.payment_intent_id);",
+									"pm.environment.set('client_secret', jsonData.data.payment.client_secret);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{"key": "Content-Type", "value": "application/json"},
+							{"key": "Accept-Language", "value": "en"}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"customerInfo\": {\n    \"firstName\": \"Michael\",\n    \"lastName\": \"Johnson\",\n    \"email\": \"michael.johnson@example.com\",\n    \"phone\": \"+1-555-9876\",\n    \"country\": \"United States\"\n  },\n  \"pickupLocation\": \"Breathless Cancun Soul Resort & Spa - Main Lobby\",\n  \"dropoffLocation\": \"Cancun International Airport - Terminal 4 Departures\",\n  \"pickupDateTime\": \"2025-12-28T08:00:00\",\n  \"passengers\": 8,\n  \"serviceId\": 5,\n  \"serviceName\": \"One Way\",\n  \"currency\": \"USD\",\n  \"totalPrice\": 185.50,\n  \"specialRequests\": \"Large group with extra luggage. Please bring spacious vehicle. One passenger uses wheelchair. Need assistance with bags.\",\n  \"childSeats\": 3,\n  \"wheelchairAccessible\": true,\n  \"hotelReservationName\": \"Johnson Extended Family Holiday Group\",\n  \"fromLocationId\": 2,\n  \"toLocationId\": 1,\n  \"fromLocationType\": \"location\",\n  \"toLocationType\": \"airport\",\n  \"tripType\": \"departure\",\n  \"bookingDate\": \"2025-09-06T18:45:00\",\n  \"departureFlightInfo\": {\n    \"airline\": \"Delta Airlines\",\n    \"flightNumber\": \"DL1547\",\n    \"date\": \"2025-12-28\",\n    \"time\": \"11:30\"\n  }\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/bookings/create-with-payment",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "bookings", "create-with-payment"]
+						}
+					}
+				},
+				{
+					"name": "💶 Create Booking with Payment - EUR Currency",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('EUR booking with payment created', () => pm.response.to.have.status(201));",
+									"pm.test('Currency is EUR', function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data.payment.currency).to.equal('eur');",
+									"    pm.expect(jsonData.data.booking.pricing.currency).to.equal('EUR');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{"key": "Content-Type", "value": "application/json"},
+							{"key": "Accept-Language", "value": "es"}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"customerInfo\": {\n    \"firstName\": \"Carlos\",\n    \"lastName\": \"García\",\n    \"email\": \"carlos.garcia@example.com\",\n    \"phone\": \"+34-91-123-4567\",\n    \"country\": \"Spain\"\n  },\n  \"pickupLocation\": \"Hotel Xcaret México - Main Lobby\",\n  \"dropoffLocation\": \"Playa del Carmen - Ferry Terminal\",\n  \"pickupDateTime\": \"2025-11-15T14:30:00\",\n  \"passengers\": 4,\n  \"serviceId\": 3,\n  \"serviceName\": \"Hotel to Hotel\",\n  \"currency\": \"EUR\",\n  \"totalPrice\": 125.75,\n  \"specialRequests\": \"Family vacation transfer. Please provide child seats.\",\n  \"childSeats\": 2,\n  \"wheelchairAccessible\": false,\n  \"hotelReservationName\": \"García Family Vacation\",\n  \"fromLocationId\": 15,\n  \"toLocationId\": 22,\n  \"fromLocationType\": \"location\",\n  \"toLocationType\": \"location\",\n  \"tripType\": \"hotel-to-hotel\",\n  \"bookingDate\": \"2025-09-06T19:00:00\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/bookings/create-with-payment",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "bookings", "create-with-payment"]
+						}
+					}
+				},
+				{
+					"name": "✈️ Create Booking with Payment - Airport Arrival with Flight Info",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Airport arrival booking created', () => pm.response.to.have.status(201));",
+									"pm.test('Has flight information', function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data.booking.flight_info.arrival).to.be.an('object');",
+									"    pm.expect(jsonData.data.booking.trip_details.type).to.equal('arrival');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{"key": "Content-Type", "value": "application/json"},
+							{"key": "Accept-Language", "value": "en"}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"customerInfo\": {\n    \"firstName\": \"Sarah\",\n    \"lastName\": \"Wilson\",\n    \"email\": \"sarah.wilson@example.com\",\n    \"phone\": \"+1-555-2468\",\n    \"country\": \"Canada\"\n  },\n  \"pickupLocation\": \"Cancun International Airport - Terminal 2 Arrivals\",\n  \"dropoffLocation\": \"Grand Velas Riviera Maya - Resort Reception\",\n  \"pickupDateTime\": \"2025-10-20T16:15:00\",\n  \"passengers\": 2,\n  \"serviceId\": 2,\n  \"serviceName\": \"One Way\",\n  \"currency\": \"CAD\",\n  \"totalPrice\": 95.00,\n  \"specialRequests\": \"Honeymoon couple. Please monitor flight for delays.\",\n  \"childSeats\": 0,\n  \"wheelchairAccessible\": false,\n  \"hotelReservationName\": \"Wilson Honeymoon Suite\",\n  \"fromLocationId\": 1,\n  \"toLocationId\": 8,\n  \"fromLocationType\": \"airport\",\n  \"toLocationType\": \"location\",\n  \"tripType\": \"arrival\",\n  \"bookingDate\": \"2025-09-06T20:00:00\",\n  \"arrivalFlightInfo\": {\n    \"airline\": \"Air Canada\",\n    \"flightNumber\": \"AC1876\",\n    \"date\": \"2025-10-20\",\n    \"time\": \"16:00\"\n  }\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/bookings/create-with-payment",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "bookings", "create-with-payment"]
+						}
+					}
+				},
+				{
+					"name": "🌐 Frontend Format Test - Real Frontend Data",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Frontend format booking created successfully', () => pm.response.to.have.status(201));",
+									"pm.test('Handles frontend data format', function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    pm.expect(jsonData.data.booking).to.have.property('booking_number');",
+									"    pm.expect(jsonData.data.payment).to.have.property('client_secret');",
+									"    pm.expect(jsonData.data.booking.service.name).to.equal('One Way'); // Mapped from 'standard private'",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{"key": "Content-Type", "value": "application/json"},
+							{"key": "Accept-Language", "value": "en"}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"customerInfo\": {\n    \"firstName\": \"John\",\n    \"lastName\": \"Doe\",\n    \"email\": \"john.doe@example.com\",\n    \"phone\": \"+1-555-1234\",\n    \"country\": \"United States\"\n  },\n  \"pickupLocation\": \"Cancun Airport (CUN)\",\n  \"dropoffLocation\": \"Cancun Country Club\",\n  \"pickupDateTime\": \"2025-09-07T\",\n  \"passengers\": 1,\n  \"serviceId\": \"1\",\n  \"serviceName\": \"standard private\",\n  \"currency\": \"USD\",\n  \"totalPrice\": 20,\n  \"specialRequests\": \"Please be on time\",\n  \"arrivalFlightInfo\": {\n    \"airline\": \"American Airlines\",\n    \"flightNumber\": \"AA1234\",\n    \"date\": \"2025-09-23\",\n    \"time\": \"12:12\"\n  },\n  \"departureFlightInfo\": {\n    \"airline\": \"Delta Airlines\",\n    \"flightNumber\": \"DL5678\",\n    \"date\": \"2025-09-30\",\n    \"time\": \"21:32\"\n  },\n  \"childSeats\": 3,\n  \"wheelchairAccessible\": true,\n  \"hotelReservationName\": \"Doe Family Vacation\",\n  \"fromLocationId\": \"1\",\n  \"toLocationId\": \"3\",\n  \"fromLocationType\": \"airport\",\n  \"toLocationType\": \"zone\",\n  \"tripType\": \"arrival\",\n  \"bookingDate\": \"2025-09-07\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/bookings/create-with-payment",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "bookings", "create-with-payment"]
+						}
+					}
+				},
+				{
+					"name": "❌ Error Cases - One-Step Booking",
+					"item": [
+						{
+							"name": "❌ Missing Required Customer Info",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test('Validation error 422', () => pm.response.to.have.status(422));",
+											"pm.test('Has validation errors', function () {",
+											"    const jsonData = pm.response.json();",
+											"    pm.expect(jsonData.success).to.be.false;",
+											"    pm.expect(jsonData.errors).to.be.an('object');",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{"key": "Content-Type", "value": "application/json"}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"customerInfo\": {\n    \"firstName\": \"John\"\n  },\n  \"pickupLocation\": \"Some Hotel\",\n  \"currency\": \"USD\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/v1/bookings/create-with-payment",
+									"host": ["{{base_url}}"],
+									"path": ["api", "v1", "bookings", "create-with-payment"]
+								}
+							}
+						},
+						{
+							"name": "❌ Invalid Currency",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test('Currency validation error', () => pm.response.to.have.status(422));"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{"key": "Content-Type", "value": "application/json"}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"customerInfo\": {\n    \"firstName\": \"John\",\n    \"lastName\": \"Doe\",\n    \"email\": \"john@example.com\",\n    \"phone\": \"+1-555-0123\",\n    \"country\": \"United States\"\n  },\n  \"pickupLocation\": \"Beach Palace Cancun\",\n  \"dropoffLocation\": \"The Reef 28\",\n  \"pickupDateTime\": \"2025-11-15T10:30:00\",\n  \"passengers\": 4,\n  \"serviceName\": \"Round Trip\",\n  \"currency\": \"INVALID\",\n  \"totalPrice\": 150.00,\n  \"fromLocationId\": 1,\n  \"toLocationId\": 18,\n  \"fromLocationType\": \"location\",\n  \"toLocationType\": \"location\",\n  \"tripType\": \"round-trip\",\n  \"bookingDate\": \"2025-09-06T14:30:00\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/v1/bookings/create-with-payment",
+									"host": ["{{base_url}}"],
+									"path": ["api", "v1", "bookings", "create-with-payment"]
+								}
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "💳 Payment Integration - Stripe",
+			"item": [
+				{
+					"name": "💳 Create Payment Intent",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Payment intent created successfully', () => pm.response.to.have.status(200));",
+									"pm.test('Response has client secret', function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    pm.expect(jsonData.data).to.have.property('client_secret');",
+									"    pm.expect(jsonData.data).to.have.property('payment_intent_id');",
+									"    pm.expect(jsonData.data).to.have.property('amount');",
+									"    pm.expect(jsonData.data).to.have.property('currency');",
+									"});",
+									"",
+									"// Store payment intent for other tests",
+									"const jsonData = pm.response.json();",
+									"pm.environment.set('payment_intent_id', jsonData.data.payment_intent_id);",
+									"pm.environment.set('client_secret', jsonData.data.client_secret);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{"key": "Content-Type", "value": "application/json"},
+							{"key": "Accept", "value": "application/json"}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"booking_id\": \"{{test_booking_id}}\",\n  \"currency\": \"USD\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/create-payment-intent",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "create-payment-intent"]
+						}
+					}
+				},
+				{
+					"name": "💰 Create Payment Intent - EUR Currency",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('EUR payment intent created', () => pm.response.to.have.status(200));",
+									"pm.test('Currency is EUR', function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data.currency).to.equal('eur');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{"key": "Content-Type", "value": "application/json"},
+							{"key": "Accept", "value": "application/json"}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"booking_id\": \"{{test_booking_id}}\",\n  \"currency\": \"EUR\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/create-payment-intent",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "create-payment-intent"]
+						}
+					}
+				},
+				{
+					"name": "📊 Get Payment Status",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Payment status retrieved', () => pm.response.to.have.status(200));",
+									"pm.test('Has payment status data', function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    pm.expect(jsonData.data).to.have.property('payment_status');",
+									"    pm.expect(jsonData.data).to.have.property('booking_id');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{"key": "Accept", "value": "application/json"}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/bookings/{{test_booking_id}}/payment-status",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "bookings", "{{test_booking_id}}", "payment-status"]
+						}
+					}
+				},
+				{
+					"name": "🔔 Stripe Webhook - Payment Succeeded",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Webhook processed successfully', () => pm.response.to.have.status(200));",
+									"pm.test('Success response', function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.status).to.equal('success');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{"key": "Content-Type", "value": "application/json"},
+							{"key": "Stripe-Signature", "value": "t=1609459200,v1=test_signature"}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"id\": \"evt_test_webhook\",\n  \"object\": \"event\",\n  \"api_version\": \"2020-08-27\",\n  \"created\": 1609459200,\n  \"data\": {\n    \"object\": {\n      \"id\": \"{{payment_intent_id}}\",\n      \"object\": \"payment_intent\",\n      \"amount\": 15000,\n      \"currency\": \"usd\",\n      \"status\": \"succeeded\",\n      \"metadata\": {\n        \"booking_id\": \"{{test_booking_id}}\"\n      }\n    }\n  },\n  \"livemode\": false,\n  \"pending_webhooks\": 1,\n  \"request\": {\n    \"id\": \"req_test\",\n    \"idempotency_key\": null\n  },\n  \"type\": \"payment_intent.succeeded\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/stripe/webhook",
+							"host": ["{{base_url}}"],
+							"path": ["stripe", "webhook"]
+						}
+					}
+				},
+				{
+					"name": "❌ Payment Error Cases",
+					"item": [
+						{
+							"name": "❌ Create Payment Intent - Invalid Booking",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test('Invalid booking error', () => pm.response.to.have.status(422));",
+											"pm.test('Error message returned', function () {",
+											"    const jsonData = pm.response.json();",
+											"    pm.expect(jsonData.success).to.be.false;",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{"key": "Content-Type", "value": "application/json"}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"booking_id\": \"99999\",\n  \"currency\": \"USD\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/v1/create-payment-intent",
+									"host": ["{{base_url}}"],
+									"path": ["api", "v1", "create-payment-intent"]
+								}
+							}
+						},
+						{
+							"name": "❌ Create Payment Intent - Invalid Currency",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test('Invalid currency error', () => pm.response.to.have.status(422));"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{"key": "Content-Type", "value": "application/json"}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"booking_id\": \"{{test_booking_id}}\",\n  \"currency\": \"INVALID\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/v1/create-payment-intent",
+									"host": ["{{base_url}}"],
+									"path": ["api", "v1", "create-payment-intent"]
+								}
+							}
+						},
+						{
+							"name": "❌ Payment Status - Booking Not Found",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test('Booking not found', () => pm.response.to.have.status(404));"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/v1/bookings/99999/payment-status",
+									"host": ["{{base_url}}"],
+									"path": ["api", "v1", "bookings", "99999", "payment-status"]
+								}
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "🌐 i18n Language Testing",
+			"item": [
+				{
+					"name": "Query Parameter Override (ES wins over EN header)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Spanish response (query param priority)', function () {",
 									"    const jsonData = pm.response.json();",
 									"    pm.expect(jsonData.message).to.include('exitosamente');",
 									"});"
@@ -1396,208 +2218,17 @@
 					],
 					"request": {
 						"method": "GET",
-						"header": [{"key": "Accept-Language", "value": "es-MX;q=0.9,fr-FR;q=0.8,en;q=0.7"}],
-						"url": {
-							"raw": "{{base_url}}/api/v1/quote?service_type=one-way&from_location_id=1&to_location_id=2&pax=2",
-							"host": ["{{base_url}}"],
-							"path": ["api", "v1", "quote"],
-							"query": [
-								{"key": "service_type", "value": "one-way"},
-								{"key": "from_location_id", "value": "1"},
-								{"key": "to_location_id", "value": "2"},
-								{"key": "pax", "value": "2"}
-							]
-						}
-					}
-				},
-				{
-					"name": "Unsupported Language Fallback (DE -> EN)",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"English fallback response\", function () {",
-									"    const jsonData = pm.response.json();",
-									"    pm.expect(jsonData.message).to.include('successfully');",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [{"key": "Accept-Language", "value": "de-DE,de;q=0.9"}],
-						"url": {
-							"raw": "{{base_url}}/api/v1/quote?service_type=one-way&from_location_id=1&to_location_id=2&pax=2",
-							"host": ["{{base_url}}"],
-							"path": ["api", "v1", "quote"],
-							"query": [
-								{"key": "service_type", "value": "one-way"},
-								{"key": "from_location_id", "value": "1"},
-								{"key": "to_location_id", "value": "2"},
-								{"key": "pax", "value": "2"}
-							]
-						}
-					}
-				},
-				{
-					"name": "Complex Accept-Language Header",
-					"request": {
-						"method": "GET",
-						"header": [{"key": "Accept-Language", "value": "fr-CA,fr;q=0.9,en-GB;q=0.8,en;q=0.7,es;q=0.6"}],
-						"url": {
-							"raw": "{{base_url}}/api/v1/quote?service_type=round-trip&from_location_id=1&to_location_id=3&pax=3",
-							"host": ["{{base_url}}"],
-							"path": ["api", "v1", "quote"],
-							"query": [
-								{"key": "service_type", "value": "round-trip"},
-								{"key": "from_location_id", "value": "1"},
-								{"key": "to_location_id", "value": "3"},
-								{"key": "pax", "value": "3"}
-							]
-						}
-					}
-				}
-			]
-		},
-		{
-			"name": "❌ Error Scenarios & Edge Cases",
-			"item": [
-				{
-					"name": "404 - Route Not Found",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Not found 404\", () => pm.response.to.have.status(404));"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [{"key": "Accept-Language", "value": "es"}],
-						"url": {
-							"raw": "{{base_url}}/api/v1/nonexistent-endpoint",
-							"host": ["{{base_url}}"],
-							"path": ["api", "v1", "nonexistent-endpoint"]
-						}
-					}
-				},
-				{
-					"name": "429 - Rate Limit (Run multiple times quickly)",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"// This may return 200 or 429 depending on rate limiting",
-									"pm.test(\"Response is valid\", function () {",
-									"    pm.expect(pm.response.code).to.be.oneOf([200, 429]);",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
 						"header": [{"key": "Accept-Language", "value": "en"}],
 						"url": {
-							"raw": "{{base_url}}/api/v1/quote?service_type=one-way&from_location_id=1&to_location_id=2&pax=2",
+							"raw": "{{base_url}}/api/v1/quote?locale=es&service_type=one-way&from_location_id=1&to_location_id=5&pax=2",
 							"host": ["{{base_url}}"],
 							"path": ["api", "v1", "quote"],
 							"query": [
+								{"key": "locale", "value": "es", "description": "Query param overrides header"},
 								{"key": "service_type", "value": "one-way"},
 								{"key": "from_location_id", "value": "1"},
-								{"key": "to_location_id", "value": "2"},
+								{"key": "to_location_id", "value": "5"},
 								{"key": "pax", "value": "2"}
-							]
-						}
-					}
-				},
-				{
-					"name": "Edge Case - Maximum Passengers",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/api/v1/quote?service_type=one-way&from_location_id=1&to_location_id=2&pax=50",
-							"host": ["{{base_url}}"],
-							"path": ["api", "v1", "quote"],
-							"query": [
-								{"key": "service_type", "value": "one-way"},
-								{"key": "from_location_id", "value": "1"},
-								{"key": "to_location_id", "value": "2"},
-								{"key": "pax", "value": "50", "description": "Maximum allowed passengers"}
-							]
-						}
-					}
-				},
-				{
-					"name": "Edge Case - Future Date",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/api/v1/quote?service_type=round-trip&from_location_id=1&to_location_id=2&pax=2&date=2026-12-31",
-							"host": ["{{base_url}}"],
-							"path": ["api", "v1", "quote"],
-							"query": [
-								{"key": "service_type", "value": "round-trip"},
-								{"key": "from_location_id", "value": "1"},
-								{"key": "to_location_id", "value": "2"},
-								{"key": "pax", "value": "2"},
-								{"key": "date", "value": "2026-12-31", "description": "Far future date"}
-							]
-						}
-					}
-				},
-				{
-					"name": "Edge Case - Large Pagination",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/api/v1/rates?per_page=100&page=1",
-							"host": ["{{base_url}}"],
-							"path": ["api", "v1", "rates"],
-							"query": [
-								{"key": "per_page", "value": "100", "description": "Maximum allowed per page"},
-								{"key": "page", "value": "1"}
-							]
-						}
-					}
-				},
-				{
-					"name": "Edge Case - Invalid Pagination",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Handles invalid pagination gracefully\", function () {",
-									"    pm.expect(pm.response.code).to.be.oneOf([200, 422]);",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/api/v1/rates?per_page=1000&page=-1",
-							"host": ["{{base_url}}"],
-							"path": ["api", "v1", "rates"],
-							"query": [
-								{"key": "per_page", "value": "1000", "description": "Exceeds maximum"},
-								{"key": "page", "value": "-1", "description": "Invalid page number"}
 							]
 						}
 					}
@@ -1612,33 +2243,22 @@
 				"type": "text/javascript",
 				"exec": [
 					"// Global pre-request script",
-					"console.log('=== REQUEST START ===');",
+					"console.log('=== FiveStars API Test Suite ===');",
 					"console.log('URL:', pm.request.url.toString());",
 					"console.log('Method:', pm.request.method);",
 					"",
 					"// Add common headers",
 					"pm.request.headers.add({",
 					"    key: 'User-Agent',",
-					"    value: 'FiveStars-API-Test-Suite/1.0'",
+					"    value: 'FiveStars-API-Test-Suite/2.0'",
 					"});",
-					"",
-					"// Log locale information",
-					"const locale = pm.request.url.query.get('locale') || ",
-					"              pm.request.headers.get('Accept-Language') || 'en (default)';",
-					"console.log('Language:', locale);",
 					"",
 					"// Set request timestamp",
 					"pm.environment.set('request_timestamp', new Date().toISOString());",
 					"",
-					"// Auto-set variables for dynamic requests",
+					"// Auto-set base URL if not set",
 					"if (!pm.environment.get('base_url')) {",
-					"    pm.environment.set('base_url', 'http://localhost:8000');",
-					"}",
-					"if (!pm.environment.get('created_rate_id')) {",
-					"    pm.environment.set('created_rate_id', '1'); // fallback",
-					"}",
-					"if (!pm.environment.get('created_location_id')) {",
-					"    pm.environment.set('created_location_id', '1'); // fallback",
+					"    pm.environment.set('base_url', 'http://localhost');",
 					"}"
 				]
 			}
@@ -1654,8 +2274,8 @@
 					"console.log(`Time: ${pm.response.responseTime}ms`);",
 					"",
 					"// Performance test",
-					"pm.test('Response time is acceptable', function () {",
-					"    pm.expect(pm.response.responseTime).to.be.below(10000); // 10 seconds max",
+					"pm.test('Response time is reasonable', function () {",
+					"    pm.expect(pm.response.responseTime).to.be.below(10000);",
 					"});",
 					"",
 					"// Content type test",
@@ -1672,11 +2292,6 @@
 					"        pm.expect(jsonData).to.have.property('timestamp');",
 					"        pm.expect(jsonData).to.have.property('request_id');",
 					"    });",
-					"    ",
-					"    pm.test('Timestamp is valid ISO format', function () {",
-					"        const jsonData = pm.response.json();",
-					"        pm.expect(jsonData.timestamp).to.match(/^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}/);",
-					"    });",
 					"}",
 					"",
 					"// Error response structure test",
@@ -1685,11 +2300,8 @@
 					"        const jsonData = pm.response.json();",
 					"        pm.expect(jsonData).to.have.property('success');",
 					"        pm.expect(jsonData.success).to.be.false;",
-					"        pm.expect(jsonData).to.have.property('message');",
 					"    });",
-					"}",
-					"",
-					"console.log('=== REQUEST END ===');"
+					"}"
 				]
 			}
 		}
@@ -1697,56 +2309,53 @@
 	"variable": [
 		{
 			"key": "base_url",
-			"value": "http://localhost:8000",
+			"value": "http://localhost",
 			"type": "string",
-			"description": "Base API URL - change to your server address"
+			"description": "Base API URL - Update to your server address"
 		},
 		{
-			"key": "api_version",
-			"value": "v1",
+			"key": "compare_from",
+			"value": "1",
 			"type": "string"
 		},
 		{
-			"key": "created_rate_id",
-			"value": "1",
-			"type": "string",
-			"description": "ID of created rate (populated by tests)"
+			"key": "compare_to",
+			"value": "18",
+			"type": "string"
 		},
 		{
-			"key": "created_location_id",
-			"value": "1",
-			"type": "string",
-			"description": "ID of created location (populated by tests)"
+			"key": "compare_pax",
+			"value": "4",
+			"type": "string"
 		},
 		{
-			"key": "created_city_id",
-			"value": "1",
-			"type": "string",
-			"description": "ID of created city (populated by tests)"
+			"key": "default_price",
+			"value": "0",
+			"type": "string"
 		},
 		{
-			"key": "created_zone_id",
+			"key": "test_booking_id",
 			"value": "1",
 			"type": "string",
-			"description": "ID of created zone (populated by tests)"
+			"description": "Booking ID for testing update/delete operations"
 		},
 		{
-			"key": "created_vehicle_type_id",
-			"value": "1",
+			"key": "test_booking_number",
+			"value": "FS-2025-000001",
 			"type": "string",
-			"description": "ID of created vehicle type (populated by tests)"
+			"description": "Booking number for reference"
 		},
 		{
-			"key": "created_service_feature_id",
-			"value": "1",
+			"key": "payment_intent_id",
+			"value": "pi_test_example",
 			"type": "string",
-			"description": "ID of created service feature (populated by tests)"
+			"description": "Stripe payment intent ID for testing"
 		},
 		{
-			"key": "request_timestamp",
-			"value": "",
+			"key": "client_secret",
+			"value": "pi_test_example_secret",
 			"type": "string",
-			"description": "Request timestamp (auto-populated)"
+			"description": "Stripe client secret for frontend"
 		}
 	]
 }

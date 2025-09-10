@@ -8,6 +8,9 @@ use App\Http\Controllers\Api\V1\QuoteController;
 use App\Http\Controllers\Api\V1\ServiceFeatureController;
 use App\Http\Controllers\Api\V1\VehicleTypeController;
 use App\Http\Controllers\Api\V1\RateController;
+use App\Http\Controllers\Api\V1\BookingController;
+use App\Http\Controllers\Api\V1\PaymentController;
+use App\Http\Controllers\Api\V1\ContactController;
 use App\Http\Middleware\ApiRateLimit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -52,11 +55,12 @@ Route::prefix('v1')->middleware([ApiRateLimit::class])->group(function () {
     });
 
     // Autocomplete service for booking flow
-    Route::get('/autocomplete', [AutocompleteController::class, 'search']);
+    Route::get('/autocomplete/search', [AutocompleteController::class, 'search']);
 
     // Cities API Routes
     Route::apiResource('cities', CityController::class);
     Route::get('cities/{city}/details', [CityController::class, 'withDetails']);
+    Route::get('cities/{city}/rates', [CityController::class, 'getCityRates']);
 
     // Zones API Routes
     Route::apiResource('zones', ZoneController::class);
@@ -81,4 +85,26 @@ Route::prefix('v1')->middleware([ApiRateLimit::class])->group(function () {
     Route::get('rates/zone', [RateController::class, 'getZoneRates']);
     Route::apiResource('rates', RateController::class);
 
+    // Booking API Routes (specific routes first to avoid conflicts)
+    Route::post('/bookings/create-with-payment', [BookingController::class, 'createWithPayment']);
+    Route::apiResource('bookings', BookingController::class);
+
+    // Payment API Routes
+    Route::post('/create-payment-intent', [PaymentController::class, 'createPaymentIntent']);
+    Route::get('/bookings/{booking}/payment-status', [PaymentController::class, 'getPaymentStatus']);
+    Route::post('/bookings/{identifier}/payment-intent', [PaymentController::class, 'createPaymentIntentForBooking']);
+    
+    // Contact Form Routes
+    Route::post('/contact', [ContactController::class, 'store']);
+    Route::get('/contacts', [ContactController::class, 'index']); // Admin only
+    Route::get('/contacts/stats', [ContactController::class, 'stats']); // Admin only
+    Route::get('/contacts/{id}', [ContactController::class, 'show']); // Admin only
+    Route::patch('/contacts/{id}/status', [ContactController::class, 'updateStatus']); // Admin only
+    
+    // Debug route for testing service name mapping
+    Route::post('/debug/service-mapping', [BookingController::class, 'debugServiceMapping']);
+    
 });
+
+// Stripe Webhook Route (outside of v1 prefix and rate limiting)
+Route::post('/stripe/webhook', [PaymentController::class, 'webhook'])->name('stripe.webhook');

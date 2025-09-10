@@ -14,7 +14,9 @@ class City extends Model
         'state',
         'country',
         'slug',
-        'active'
+        'active',
+        'description',
+        'image'
     ];
 
     protected $casts = [

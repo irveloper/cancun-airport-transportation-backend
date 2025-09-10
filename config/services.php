@@ -35,4 +35,17 @@ return [
         ],
     ],
 
+    'stripe' => [
+        'model' => env('STRIPE_MODEL', App\Models\User::class),
+        'key' => env('STRIPE_KEY'),
+        'secret' => env('STRIPE_SECRET'),
+        'webhook_secret' => env('STRIPE_WEBHOOK_SECRET'),
+    ],
+
+    'sendgrid' => [
+        'api_key' => env('SENDGRID_API_KEY'),
+        'from_email' => env('SENDGRID_FROM_EMAIL', env('MAIL_FROM_ADDRESS')),
+        'from_name' => env('SENDGRID_FROM_NAME', env('MAIL_FROM_NAME')),
+    ],
+
 ];
