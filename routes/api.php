@@ -60,6 +60,7 @@ Route::prefix('v1')->middleware([ApiRateLimit::class])->group(function () {
     // Cities API Routes
     Route::apiResource('cities', CityController::class);
     Route::get('cities/{city}/details', [CityController::class, 'withDetails']);
+    Route::get('cities/{city}/rates', [CityController::class, 'getCityRates']);
 
     // Zones API Routes
     Route::apiResource('zones', ZoneController::class);
