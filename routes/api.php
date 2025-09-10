@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\V1\VehicleTypeController;
 use App\Http\Controllers\Api\V1\RateController;
 use App\Http\Controllers\Api\V1\BookingController;
 use App\Http\Controllers\Api\V1\PaymentController;
+use App\Http\Controllers\Api\V1\ContactController;
 use App\Http\Middleware\ApiRateLimit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -90,6 +91,14 @@ Route::prefix('v1')->middleware([ApiRateLimit::class])->group(function () {
     // Payment API Routes
     Route::post('/create-payment-intent', [PaymentController::class, 'createPaymentIntent']);
     Route::get('/bookings/{booking}/payment-status', [PaymentController::class, 'getPaymentStatus']);
+    Route::post('/bookings/{identifier}/payment-intent', [PaymentController::class, 'createPaymentIntentForBooking']);
+    
+    // Contact Form Routes
+    Route::post('/contact', [ContactController::class, 'store']);
+    Route::get('/contacts', [ContactController::class, 'index']); // Admin only
+    Route::get('/contacts/stats', [ContactController::class, 'stats']); // Admin only
+    Route::get('/contacts/{id}', [ContactController::class, 'show']); // Admin only
+    Route::patch('/contacts/{id}/status', [ContactController::class, 'updateStatus']); // Admin only
     
     // Debug route for testing service name mapping
     Route::post('/debug/service-mapping', [BookingController::class, 'debugServiceMapping']);

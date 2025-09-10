@@ -155,15 +155,14 @@ class BookingController extends Controller
         }
     }
 
-    public function show($id): JsonResponse
+    public function show($identifier): JsonResponse
     {
-        $booking = Booking::with(['customer', 'serviceType', 'vehicleType', 'fromLocation', 'toLocation'])
-                         ->find($id);
+        $booking = $this->findBookingByIdentifier($identifier);
 
         if (!$booking) {
             return response()->json([
                 'success' => false,
-                'message' => 'Booking not found'
+                'message' => 'Booking not found with ID or booking number: ' . $identifier
             ], 404);
         }
 
@@ -173,14 +172,14 @@ class BookingController extends Controller
         ]);
     }
 
-    public function update(Request $request, $id): JsonResponse
+    public function update(Request $request, $identifier): JsonResponse
     {
-        $booking = Booking::find($id);
+        $booking = $this->findBookingByIdentifier($identifier, false); // No relations needed for update
 
         if (!$booking) {
             return response()->json([
                 'success' => false,
-                'message' => 'Booking not found'
+                'message' => 'Booking not found with ID or booking number: ' . $identifier
             ], 404);
         }
 
@@ -235,14 +234,14 @@ class BookingController extends Controller
         }
     }
 
-    public function destroy($id): JsonResponse
+    public function destroy($identifier): JsonResponse
     {
-        $booking = Booking::find($id);
+        $booking = $this->findBookingByIdentifier($identifier, false); // No relations needed for destroy
 
         if (!$booking) {
             return response()->json([
                 'success' => false,
-                'message' => 'Booking not found'
+                'message' => 'Booking not found with ID or booking number: ' . $identifier
             ], 404);
         }
 
@@ -268,6 +267,30 @@ class BookingController extends Controller
                 'error' => config('app.debug') ? $e->getMessage() : 'Internal server error'
             ], 500);
         }
+    }
+
+    /**
+     * Find booking by ID or booking number
+     */
+    private function findBookingByIdentifier($identifier, $withRelations = true)
+    {
+        $query = $withRelations 
+            ? Booking::with(['customer', 'serviceType', 'vehicleType', 'fromLocation', 'toLocation'])
+            : Booking::query();
+        
+        $booking = null;
+        
+        if (is_numeric($identifier)) {
+            // Search by ID first
+            $booking = $query->find($identifier);
+        }
+        
+        // If not found by ID or if identifier is not numeric, try booking_number
+        if (!$booking) {
+            $booking = $query->where('booking_number', $identifier)->first();
+        }
+        
+        return $booking;
     }
 
     /**
