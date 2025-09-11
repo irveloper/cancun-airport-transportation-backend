@@ -464,6 +464,231 @@
 					]
 				},
 				{
+					"name": "✨ Highlighted/Featured Quotes",
+					"item": [
+						{
+							"name": "🌟 Get All Highlighted Quotes (USD)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test('Highlighted quotes successful', () => pm.response.to.have.status(200));",
+											"pm.test('Has highlighted quotes array', function () {",
+											"    const jsonData = pm.response.json();",
+											"    pm.expect(jsonData.data.highlighted_quotes).to.be.an('array');",
+											"    pm.expect(jsonData.data.highlighted_quotes.length).to.be.above(0);",
+											"});",
+											"pm.test('Each quote has required fields', function () {",
+											"    const jsonData = pm.response.json();",
+											"    const quote = jsonData.data.highlighted_quotes[0];",
+											"    pm.expect(quote).to.have.property('service_category');",
+											"    pm.expect(quote).to.have.property('vehicle_type');",
+											"    pm.expect(quote).to.have.property('route');",
+											"    pm.expect(quote).to.have.property('pricing');",
+											"    pm.expect(quote).to.have.property('highlight');",
+											"});",
+											"pm.test('Route has from and to locations', function () {",
+											"    const jsonData = pm.response.json();",
+											"    const route = jsonData.data.highlighted_quotes[0].route;",
+											"    pm.expect(route.from).to.have.property('name');",
+											"    pm.expect(route.to).to.have.property('name');",
+											"    pm.expect(route.from).to.have.property('city');",
+											"    pm.expect(route.to).to.have.property('city');",
+											"});",
+											"pm.test('Pricing in USD', function () {",
+											"    const jsonData = pm.response.json();",
+											"    pm.expect(jsonData.data.currency).to.equal('usd');",
+											"    pm.expect(jsonData.data.highlighted_quotes[0].pricing.starting_from).to.be.a('number');",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									},
+									{
+										"key": "Accept-Language", 
+										"value": "en"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/api/v1/highlighted-quotes?currency=USD&locale=en",
+									"host": ["{{base_url}}"],
+									"path": ["api", "v1", "highlighted-quotes"],
+									"query": [
+										{
+											"key": "currency",
+											"value": "USD",
+											"description": "Currency for pricing (USD/MXN)"
+										},
+										{
+											"key": "locale",
+											"value": "en", 
+											"description": "Language for response (en/es)"
+										}
+									]
+								},
+								"description": "Get all highlighted/featured quotes for homepage display. Returns service categories like Airport Transfer, Hotel Transfer, and Private Transfer with predefined routes, pricing, and vehicle details."
+							},
+							"response": []
+						},
+						{
+							"name": "💰 Get All Highlighted Quotes (MXN)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test('Highlighted quotes successful', () => pm.response.to.have.status(200));",
+											"pm.test('Currency converted to MXN', function () {",
+											"    const jsonData = pm.response.json();",
+											"    pm.expect(jsonData.data.currency).to.equal('mxn');",
+											"    const price = jsonData.data.highlighted_quotes[0].pricing.starting_from;",
+											"    pm.expect(price).to.be.above(500); // Should be higher in MXN",
+											"});",
+											"pm.test('Exchange rates provided', function () {",
+											"    const jsonData = pm.response.json();",
+											"    pm.expect(jsonData.data.exchange_rates).to.have.property('to_usd');",
+											"    pm.expect(jsonData.data.exchange_rates).to.have.property('to_mxn');",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									},
+									{
+										"key": "Accept-Language",
+										"value": "es"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/api/v1/highlighted-quotes?currency=MXN&locale=es",
+									"host": ["{{base_url}}"],
+									"path": ["api", "v1", "highlighted-quotes"],
+									"query": [
+										{
+											"key": "currency",
+											"value": "MXN",
+											"description": "Mexican Pesos currency"
+										},
+										{
+											"key": "locale",
+											"value": "es",
+											"description": "Spanish language"
+										}
+									]
+								},
+								"description": "Get highlighted quotes with pricing in Mexican Pesos and Spanish language responses."
+							},
+							"response": []
+						},
+						{
+							"name": "🎯 Get Single Highlighted Quote",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test('Single quote successful', () => pm.response.to.have.status(200));",
+											"pm.test('Returns single quote object', function () {",
+											"    const jsonData = pm.response.json();",
+											"    pm.expect(jsonData.data).to.be.an('object');",
+											"    pm.expect(jsonData.data.id).to.equal(1);",
+											"});",
+											"pm.test('Quote has all detail fields', function () {",
+											"    const jsonData = pm.response.json();",
+											"    const quote = jsonData.data;",
+											"    pm.expect(quote.vehicle_type).to.have.property('video_url');",
+											"    pm.expect(quote.vehicle_type).to.have.property('frame');",
+											"    pm.expect(quote.vehicle_type.features).to.be.an('array');",
+											"    pm.expect(quote.pricing).to.have.property('currency');",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/api/v1/highlighted-quotes/1?currency=USD&locale=en",
+									"host": ["{{base_url}}"],
+									"path": ["api", "v1", "highlighted-quotes", "1"],
+									"query": [
+										{
+											"key": "currency",
+											"value": "USD"
+										},
+										{
+											"key": "locale",
+											"value": "en"
+										}
+									]
+								},
+								"description": "Get detailed information for a specific highlighted quote by ID. Includes additional fields like video_url and frame for detailed display."
+							},
+							"response": []
+						},
+						{
+							"name": "❌ Get Non-existent Highlighted Quote",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test('Returns 404 for non-existent quote', () => {",
+											"    pm.response.to.have.status(404);",
+											"});",
+											"pm.test('Error response format', function () {",
+											"    const jsonData = pm.response.json();",
+											"    pm.expect(jsonData.success).to.be.false;",
+											"    pm.expect(jsonData.message).to.include('not_found');",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/api/v1/highlighted-quotes/999",
+									"host": ["{{base_url}}"],
+									"path": ["api", "v1", "highlighted-quotes", "999"]
+								},
+								"description": "Test error handling for non-existent highlighted quote ID."
+							},
+							"response": []
+						}
+					]
+				},
+				{
 					"name": "🎯 Edge Cases & Stress Tests",
 					"item": [
 						{
