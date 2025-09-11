@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\V1\RateController;
 use App\Http\Controllers\Api\V1\BookingController;
 use App\Http\Controllers\Api\V1\PaymentController;
 use App\Http\Controllers\Api\V1\ContactController;
+use App\Http\Controllers\Api\V1\HighlightedQuoteController;
 use App\Http\Middleware\ApiRateLimit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -73,6 +74,10 @@ Route::prefix('v1')->middleware([ApiRateLimit::class])->group(function () {
 
     // Quote API Route
     Route::get('/quote', [QuoteController::class, 'getQuote']);
+
+    // Highlighted/Featured Quotes API Routes
+    Route::get('/highlighted-quotes', [HighlightedQuoteController::class, 'index']);
+    Route::get('/highlighted-quotes/{id}', [HighlightedQuoteController::class, 'show']);
 
     // Service Features API Routes
     Route::apiResource('service-features', ServiceFeatureController::class);
