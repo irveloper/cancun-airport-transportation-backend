@@ -30,14 +30,8 @@ class ContactAutoReply extends Mailable implements ShouldQueue
     {
         return new Envelope(
             subject: 'Thank you for contacting FiveStars Transport',
-            from: [
-                'address' => config('services.sendgrid.from_email'),
-                'name' => config('services.sendgrid.from_name'),
-            ],
-            replyTo: [
-                'address' => config('services.sendgrid.from_email'),
-                'name' => config('services.sendgrid.from_name'),
-            ],
+            from: config('mail.from.address'),
+            replyTo: config('mail.from.address'),
         );
     }
 

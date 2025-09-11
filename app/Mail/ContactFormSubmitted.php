@@ -30,10 +30,7 @@ class ContactFormSubmitted extends Mailable implements ShouldQueue
     {
         return new Envelope(
             subject: 'New Contact Form Submission - ' . $this->contact->subject,
-            from: [
-                'address' => config('services.sendgrid.from_email'),
-                'name' => config('services.sendgrid.from_name'),
-            ],
+            from: config('mail.from.address'),
         );
     }
 

@@ -2,7 +2,7 @@
 
 namespace App\Mail;
 
-use App\Models\Booking;
+use App\Models\Contact;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
@@ -10,7 +10,7 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class BookingConfirmation extends Mailable implements ShouldQueue
+class GroupQuoteAutoReply extends Mailable // implements ShouldQueue
 {
     use Queueable, SerializesModels;
 
@@ -18,7 +18,8 @@ class BookingConfirmation extends Mailable implements ShouldQueue
      * Create a new message instance.
      */
     public function __construct(
-        public Booking $booking
+        public Contact $contact,
+        public array $data
     ) {
         //
     }
@@ -29,7 +30,7 @@ class BookingConfirmation extends Mailable implements ShouldQueue
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Booking Confirmed - ' . $this->booking->booking_number,
+            subject: 'Thank you for your Group Quote Request - FiveStars Transport',
             from: config('mail.from.address'),
             replyTo: config('mail.from.address'),
         );
@@ -41,13 +42,12 @@ class BookingConfirmation extends Mailable implements ShouldQueue
     public function content(): Content
     {
         return new Content(
-            html: 'emails.booking-confirmation',
-            text: 'emails.booking-confirmation-text',
+            html: 'emails.group-quote-auto-reply',
+            text: 'emails.group-quote-auto-reply-text',
             with: [
-                'booking' => $this->booking,
-                'customer' => $this->booking->customer,
-                'service' => $this->booking->serviceType,
-                'vehicle' => $this->booking->vehicleType,
+                'contact' => $this->contact,
+                'data' => $this->data,
+                'referenceNumber' => 'GQ' . str_pad($this->contact->id, 6, '0', STR_PAD_LEFT),
             ],
         );
     }
