@@ -464,6 +464,231 @@
 					]
 				},
 				{
+					"name": "✨ Highlighted/Featured Quotes",
+					"item": [
+						{
+							"name": "🌟 Get All Highlighted Quotes (USD)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test('Highlighted quotes successful', () => pm.response.to.have.status(200));",
+											"pm.test('Has highlighted quotes array', function () {",
+											"    const jsonData = pm.response.json();",
+											"    pm.expect(jsonData.data.highlighted_quotes).to.be.an('array');",
+											"    pm.expect(jsonData.data.highlighted_quotes.length).to.be.above(0);",
+											"});",
+											"pm.test('Each quote has required fields', function () {",
+											"    const jsonData = pm.response.json();",
+											"    const quote = jsonData.data.highlighted_quotes[0];",
+											"    pm.expect(quote).to.have.property('service_category');",
+											"    pm.expect(quote).to.have.property('vehicle_type');",
+											"    pm.expect(quote).to.have.property('route');",
+											"    pm.expect(quote).to.have.property('pricing');",
+											"    pm.expect(quote).to.have.property('highlight');",
+											"});",
+											"pm.test('Route has from and to locations', function () {",
+											"    const jsonData = pm.response.json();",
+											"    const route = jsonData.data.highlighted_quotes[0].route;",
+											"    pm.expect(route.from).to.have.property('name');",
+											"    pm.expect(route.to).to.have.property('name');",
+											"    pm.expect(route.from).to.have.property('city');",
+											"    pm.expect(route.to).to.have.property('city');",
+											"});",
+											"pm.test('Pricing in USD', function () {",
+											"    const jsonData = pm.response.json();",
+											"    pm.expect(jsonData.data.currency).to.equal('usd');",
+											"    pm.expect(jsonData.data.highlighted_quotes[0].pricing.starting_from).to.be.a('number');",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									},
+									{
+										"key": "Accept-Language", 
+										"value": "en"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/api/v1/highlighted-quotes?currency=USD&locale=en",
+									"host": ["{{base_url}}"],
+									"path": ["api", "v1", "highlighted-quotes"],
+									"query": [
+										{
+											"key": "currency",
+											"value": "USD",
+											"description": "Currency for pricing (USD/MXN)"
+										},
+										{
+											"key": "locale",
+											"value": "en", 
+											"description": "Language for response (en/es)"
+										}
+									]
+								},
+								"description": "Get all highlighted/featured quotes for homepage display. Returns service categories like Airport Transfer, Hotel Transfer, and Private Transfer with predefined routes, pricing, and vehicle details."
+							},
+							"response": []
+						},
+						{
+							"name": "💰 Get All Highlighted Quotes (MXN)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test('Highlighted quotes successful', () => pm.response.to.have.status(200));",
+											"pm.test('Currency converted to MXN', function () {",
+											"    const jsonData = pm.response.json();",
+											"    pm.expect(jsonData.data.currency).to.equal('mxn');",
+											"    const price = jsonData.data.highlighted_quotes[0].pricing.starting_from;",
+											"    pm.expect(price).to.be.above(500); // Should be higher in MXN",
+											"});",
+											"pm.test('Exchange rates provided', function () {",
+											"    const jsonData = pm.response.json();",
+											"    pm.expect(jsonData.data.exchange_rates).to.have.property('to_usd');",
+											"    pm.expect(jsonData.data.exchange_rates).to.have.property('to_mxn');",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									},
+									{
+										"key": "Accept-Language",
+										"value": "es"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/api/v1/highlighted-quotes?currency=MXN&locale=es",
+									"host": ["{{base_url}}"],
+									"path": ["api", "v1", "highlighted-quotes"],
+									"query": [
+										{
+											"key": "currency",
+											"value": "MXN",
+											"description": "Mexican Pesos currency"
+										},
+										{
+											"key": "locale",
+											"value": "es",
+											"description": "Spanish language"
+										}
+									]
+								},
+								"description": "Get highlighted quotes with pricing in Mexican Pesos and Spanish language responses."
+							},
+							"response": []
+						},
+						{
+							"name": "🎯 Get Single Highlighted Quote",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test('Single quote successful', () => pm.response.to.have.status(200));",
+											"pm.test('Returns single quote object', function () {",
+											"    const jsonData = pm.response.json();",
+											"    pm.expect(jsonData.data).to.be.an('object');",
+											"    pm.expect(jsonData.data.id).to.equal(1);",
+											"});",
+											"pm.test('Quote has all detail fields', function () {",
+											"    const jsonData = pm.response.json();",
+											"    const quote = jsonData.data;",
+											"    pm.expect(quote.vehicle_type).to.have.property('video_url');",
+											"    pm.expect(quote.vehicle_type).to.have.property('frame');",
+											"    pm.expect(quote.vehicle_type.features).to.be.an('array');",
+											"    pm.expect(quote.pricing).to.have.property('currency');",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/api/v1/highlighted-quotes/1?currency=USD&locale=en",
+									"host": ["{{base_url}}"],
+									"path": ["api", "v1", "highlighted-quotes", "1"],
+									"query": [
+										{
+											"key": "currency",
+											"value": "USD"
+										},
+										{
+											"key": "locale",
+											"value": "en"
+										}
+									]
+								},
+								"description": "Get detailed information for a specific highlighted quote by ID. Includes additional fields like video_url and frame for detailed display."
+							},
+							"response": []
+						},
+						{
+							"name": "❌ Get Non-existent Highlighted Quote",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test('Returns 404 for non-existent quote', () => {",
+											"    pm.response.to.have.status(404);",
+											"});",
+											"pm.test('Error response format', function () {",
+											"    const jsonData = pm.response.json();",
+											"    pm.expect(jsonData.success).to.be.false;",
+											"    pm.expect(jsonData.message).to.include('not_found');",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/api/v1/highlighted-quotes/999",
+									"host": ["{{base_url}}"],
+									"path": ["api", "v1", "highlighted-quotes", "999"]
+								},
+								"description": "Test error handling for non-existent highlighted quote ID."
+							},
+							"response": []
+						}
+					]
+				},
+				{
 					"name": "🎯 Edge Cases & Stress Tests",
 					"item": [
 						{
@@ -2232,6 +2457,1574 @@
 							]
 						}
 					}
+				}
+			]
+		},
+		{
+			"name": "🏙️ Cities Management",
+			"item": [
+				{
+					"name": "📋 Get All Cities",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Cities retrieved successfully', () => pm.response.to.have.status(200));",
+									"pm.test('Response has cities data', function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    pm.expect(jsonData.data).to.be.an('array');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [{"key": "Accept", "value": "application/json"}],
+						"url": {
+							"raw": "{{base_url}}/api/v1/cities",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "cities"]
+						}
+					}
+				},
+				{
+					"name": "➕ Create City",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('City created successfully', () => pm.response.to.have.status(201));",
+									"pm.test('Response has city data', function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    pm.expect(jsonData.data).to.have.property('id');",
+									"    pm.expect(jsonData.data).to.have.property('name');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{"key": "Content-Type", "value": "application/json"},
+							{"key": "Accept", "value": "application/json"}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Test City\",\n  \"country\": \"Mexico\",\n  \"state\": \"Quintana Roo\",\n  \"timezone\": \"America/Cancun\",\n  \"is_active\": true\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/cities",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "cities"]
+						}
+					}
+				},
+				{
+					"name": "🔍 Get City Details",
+					"request": {
+						"method": "GET",
+						"header": [{"key": "Accept", "value": "application/json"}],
+						"url": {
+							"raw": "{{base_url}}/api/v1/cities/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "cities", "1"]
+						}
+					}
+				},
+				{
+					"name": "📋 Get City with Full Details",
+					"request": {
+						"method": "GET",
+						"header": [{"key": "Accept", "value": "application/json"}],
+						"url": {
+							"raw": "{{base_url}}/api/v1/cities/1/details",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "cities", "1", "details"]
+						}
+					}
+				},
+				{
+					"name": "🏨 Get City Locations",
+					"request": {
+						"method": "GET",
+						"header": [{"key": "Accept", "value": "application/json"}],
+						"url": {
+							"raw": "{{base_url}}/api/v1/cities/1/locations",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "cities", "1", "locations"]
+						}
+					}
+				},
+				{
+					"name": "💰 Get City Rates",
+					"request": {
+						"method": "GET",
+						"header": [{"key": "Accept", "value": "application/json"}],
+						"url": {
+							"raw": "{{base_url}}/api/v1/cities/1/rates",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "cities", "1", "rates"]
+						}
+					}
+				},
+				{
+					"name": "🌐 Get City Zones",
+					"request": {
+						"method": "GET",
+						"header": [{"key": "Accept", "value": "application/json"}],
+						"url": {
+							"raw": "{{base_url}}/api/v1/cities/1/zones",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "cities", "1", "zones"]
+						}
+					}
+				},
+				{
+					"name": "✏️ Update City",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{"key": "Content-Type", "value": "application/json"},
+							{"key": "Accept", "value": "application/json"}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Updated City Name\",\n  \"is_active\": false\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/cities/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "cities", "1"]
+						}
+					}
+				},
+				{
+					"name": "🗑️ Delete City",
+					"request": {
+						"method": "DELETE",
+						"header": [{"key": "Accept", "value": "application/json"}],
+						"url": {
+							"raw": "{{base_url}}/api/v1/cities/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "cities", "1"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "📍 Locations Management",
+			"item": [
+				{
+					"name": "📋 Get All Locations",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Locations retrieved successfully', () => pm.response.to.have.status(200));",
+									"pm.test('Response has locations data', function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    pm.expect(jsonData.data).to.be.an('array');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [{"key": "Accept", "value": "application/json"}],
+						"url": {
+							"raw": "{{base_url}}/api/v1/locations",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "locations"]
+						}
+					}
+				},
+				{
+					"name": "➕ Create Location",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Location created successfully', () => pm.response.to.have.status(201));",
+									"pm.test('Response has location data', function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    pm.expect(jsonData.data).to.have.property('id');",
+									"    pm.expect(jsonData.data).to.have.property('name');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{"key": "Content-Type", "value": "application/json"},
+							{"key": "Accept", "value": "application/json"}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Test Hotel\",\n  \"address\": \"Test Address 123\",\n  \"type\": \"H\",\n  \"city_id\": 1,\n  \"zone_id\": 1,\n  \"is_active\": true,\n  \"latitude\": 21.161785,\n  \"longitude\": -86.851528\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/locations",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "locations"]
+						}
+					}
+				},
+				{
+					"name": "🏨 Get Locations by Type",
+					"request": {
+						"method": "GET",
+						"header": [{"key": "Accept", "value": "application/json"}],
+						"url": {
+							"raw": "{{base_url}}/api/v1/locations/type/H",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "locations", "type", "H"],
+							"query": [
+								{"key": "type", "value": "H", "description": "H=Hotel, A=Airport, Z=Zone", "disabled": true}
+							]
+						}
+					}
+				},
+				{
+					"name": "🔍 Get Location Details",
+					"request": {
+						"method": "GET",
+						"header": [{"key": "Accept", "value": "application/json"}],
+						"url": {
+							"raw": "{{base_url}}/api/v1/locations/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "locations", "1"]
+						}
+					}
+				},
+				{
+					"name": "✏️ Update Location",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{"key": "Content-Type", "value": "application/json"},
+							{"key": "Accept", "value": "application/json"}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Updated Hotel Name\",\n  \"address\": \"Updated Address\",\n  \"is_active\": false\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/locations/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "locations", "1"]
+						}
+					}
+				},
+				{
+					"name": "🗑️ Delete Location",
+					"request": {
+						"method": "DELETE",
+						"header": [{"key": "Accept", "value": "application/json"}],
+						"url": {
+							"raw": "{{base_url}}/api/v1/locations/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "locations", "1"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "🌐 Zones Management",
+			"item": [
+				{
+					"name": "📋 Get All Zones",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Zones retrieved successfully', () => pm.response.to.have.status(200));",
+									"pm.test('Response has zones data', function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    pm.expect(jsonData.data).to.be.an('array');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [{"key": "Accept", "value": "application/json"}],
+						"url": {
+							"raw": "{{base_url}}/api/v1/zones",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "zones"]
+						}
+					}
+				},
+				{
+					"name": "➕ Create Zone",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Zone created successfully', () => pm.response.to.have.status(201));",
+									"pm.test('Response has zone data', function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    pm.expect(jsonData.data).to.have.property('id');",
+									"    pm.expect(jsonData.data).to.have.property('name');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{"key": "Content-Type", "value": "application/json"},
+							{"key": "Accept", "value": "application/json"}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Test Zone\",\n  \"city_id\": 1,\n  \"is_active\": true\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/zones",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "zones"]
+						}
+					}
+				},
+				{
+					"name": "🔍 Get Zone Details",
+					"request": {
+						"method": "GET",
+						"header": [{"key": "Accept", "value": "application/json"}],
+						"url": {
+							"raw": "{{base_url}}/api/v1/zones/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "zones", "1"]
+						}
+					}
+				},
+				{
+					"name": "✏️ Update Zone",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{"key": "Content-Type", "value": "application/json"},
+							{"key": "Accept", "value": "application/json"}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Updated Zone Name\",\n  \"is_active\": false\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/zones/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "zones", "1"]
+						}
+					}
+				},
+				{
+					"name": "🗑️ Delete Zone",
+					"request": {
+						"method": "DELETE",
+						"header": [{"key": "Accept", "value": "application/json"}],
+						"url": {
+							"raw": "{{base_url}}/api/v1/zones/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "zones", "1"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "💰 Enhanced Rates Management",
+			"item": [
+				{
+					"name": "📋 Get All Rates (Enhanced)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Rates retrieved successfully', () => pm.response.to.have.status(200));",
+									"pm.test('Response has rates data', function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    pm.expect(jsonData.data).to.be.an('array');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [{"key": "Accept", "value": "application/json"}],
+						"url": {
+							"raw": "{{base_url}}/api/v1/rates?per_page=20",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "rates"],
+							"query": [
+								{"key": "per_page", "value": "20", "description": "Items per page"}
+							]
+						}
+					}
+				},
+				{
+					"name": "➕ Create Rate",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Rate created successfully', () => pm.response.to.have.status(201));",
+									"pm.test('Response has rate data', function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    pm.expect(jsonData.data).to.have.property('id');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{"key": "Content-Type", "value": "application/json"},
+							{"key": "Accept", "value": "application/json"}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"service_type_id\": 1,\n  \"vehicle_type_id\": 1,\n  \"from_zone_id\": 1,\n  \"to_zone_id\": 2,\n  \"total_one_way\": 85.00,\n  \"total_round_trip\": 160.00,\n  \"valid_from\": \"2025-01-01\",\n  \"valid_to\": \"2025-12-31\",\n  \"is_default\": false,\n  \"is_available\": true\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/rates",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "rates"]
+						}
+					}
+				},
+				{
+					"name": "🛣️ Get Route Rates",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Route rates retrieved successfully', () => pm.response.to.have.status(200));",
+									"pm.test('Response has route rates', function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    pm.expect(jsonData.data).to.be.an('array');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [{"key": "Accept", "value": "application/json"}],
+						"url": {
+							"raw": "{{base_url}}/api/v1/rates/route?service_type_id=1&from_location_id=1&to_location_id=2&date=2025-12-25",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "rates", "route"],
+							"query": [
+								{"key": "service_type_id", "value": "1"},
+								{"key": "from_location_id", "value": "1"},
+								{"key": "to_location_id", "value": "2"},
+								{"key": "date", "value": "2025-12-25"}
+							]
+						}
+					}
+				},
+				{
+					"name": "🌐 Get Zone Rates",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Zone rates retrieved successfully', () => pm.response.to.have.status(200));",
+									"pm.test('Response has zone rates', function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    pm.expect(jsonData.data).to.be.an('array');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [{"key": "Accept", "value": "application/json"}],
+						"url": {
+							"raw": "{{base_url}}/api/v1/rates/zone?service_type_id=1&from_zone_id=1&to_zone_id=2&date=2025-12-25",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "rates", "zone"],
+							"query": [
+								{"key": "service_type_id", "value": "1"},
+								{"key": "from_zone_id", "value": "1"},
+								{"key": "to_zone_id", "value": "2"},
+								{"key": "date", "value": "2025-12-25"}
+							]
+						}
+					}
+				},
+				{
+					"name": "🔍 Get Rate Details",
+					"request": {
+						"method": "GET",
+						"header": [{"key": "Accept", "value": "application/json"}],
+						"url": {
+							"raw": "{{base_url}}/api/v1/rates/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "rates", "1"]
+						}
+					}
+				},
+				{
+					"name": "✏️ Update Rate",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{"key": "Content-Type", "value": "application/json"},
+							{"key": "Accept", "value": "application/json"}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"total_one_way\": 95.00,\n  \"total_round_trip\": 180.00,\n  \"is_available\": false\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/rates/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "rates", "1"]
+						}
+					}
+				},
+				{
+					"name": "🗑️ Delete Rate",
+					"request": {
+						"method": "DELETE",
+						"header": [{"key": "Accept", "value": "application/json"}],
+						"url": {
+							"raw": "{{base_url}}/api/v1/rates/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "rates", "1"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "🚗 Vehicle Types Management",
+			"item": [
+				{
+					"name": "📋 Get All Vehicle Types",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Vehicle types retrieved successfully', () => pm.response.to.have.status(200));",
+									"pm.test('Response has vehicle types data', function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    pm.expect(jsonData.data).to.be.an('array');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [{"key": "Accept", "value": "application/json"}],
+						"url": {
+							"raw": "{{base_url}}/api/v1/vehicle-types",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "vehicle-types"]
+						}
+					}
+				},
+				{
+					"name": "➕ Create Vehicle Type",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Vehicle type created successfully', () => pm.response.to.have.status(201));",
+									"pm.test('Response has vehicle type data', function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    pm.expect(jsonData.data).to.have.property('id');",
+									"    pm.expect(jsonData.data).to.have.property('name');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{"key": "Content-Type", "value": "application/json"},
+							{"key": "Accept", "value": "application/json"}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Luxury SUV\",\n  \"code\": \"LUXURY_SUV\",\n  \"capacity\": 8,\n  \"description\": \"Premium luxury SUV for special occasions\",\n  \"is_active\": true\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/vehicle-types",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "vehicle-types"]
+						}
+					}
+				},
+				{
+					"name": "🔍 Get Vehicle Type Details",
+					"request": {
+						"method": "GET",
+						"header": [{"key": "Accept", "value": "application/json"}],
+						"url": {
+							"raw": "{{base_url}}/api/v1/vehicle-types/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "vehicle-types", "1"]
+						}
+					}
+				},
+				{
+					"name": "✏️ Update Vehicle Type",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{"key": "Content-Type", "value": "application/json"},
+							{"key": "Accept", "value": "application/json"}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Updated Vehicle Name\",\n  \"capacity\": 10,\n  \"is_active\": false\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/vehicle-types/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "vehicle-types", "1"]
+						}
+					}
+				},
+				{
+					"name": "🗑️ Delete Vehicle Type",
+					"request": {
+						"method": "DELETE",
+						"header": [{"key": "Accept", "value": "application/json"}],
+						"url": {
+							"raw": "{{base_url}}/api/v1/vehicle-types/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "vehicle-types", "1"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "⭐ Service Features Management",
+			"item": [
+				{
+					"name": "📋 Get All Service Features",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Service features retrieved successfully', () => pm.response.to.have.status(200));",
+									"pm.test('Response has service features data', function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    pm.expect(jsonData.data).to.be.an('array');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [{"key": "Accept", "value": "application/json"}],
+						"url": {
+							"raw": "{{base_url}}/api/v1/service-features",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "service-features"]
+						}
+					}
+				},
+				{
+					"name": "➕ Create Service Feature",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Service feature created successfully', () => pm.response.to.have.status(201));",
+									"pm.test('Response has service feature data', function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    pm.expect(jsonData.data).to.have.property('id');",
+									"    pm.expect(jsonData.data).to.have.property('name');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{"key": "Content-Type", "value": "application/json"},
+							{"key": "Accept", "value": "application/json"}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Wi-Fi Available\",\n  \"code\": \"WIFI\",\n  \"description\": \"Complimentary Wi-Fi internet access during the trip\",\n  \"is_active\": true\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/service-features",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "service-features"]
+						}
+					}
+				},
+				{
+					"name": "🔍 Get Service Feature Details",
+					"request": {
+						"method": "GET",
+						"header": [{"key": "Accept", "value": "application/json"}],
+						"url": {
+							"raw": "{{base_url}}/api/v1/service-features/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "service-features", "1"]
+						}
+					}
+				},
+				{
+					"name": "✏️ Update Service Feature",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{"key": "Content-Type", "value": "application/json"},
+							{"key": "Accept", "value": "application/json"}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Updated Feature Name\",\n  \"description\": \"Updated description\",\n  \"is_active\": false\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/service-features/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "service-features", "1"]
+						}
+					}
+				},
+				{
+					"name": "🗑️ Delete Service Feature",
+					"request": {
+						"method": "DELETE",
+						"header": [{"key": "Accept", "value": "application/json"}],
+						"url": {
+							"raw": "{{base_url}}/api/v1/service-features/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "service-features", "1"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "📞 Contact Management",
+			"item": [
+				{
+					"name": "📧 Submit Contact Form (Auto-Sends 2 Emails!)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Contact form submitted successfully', () => pm.response.to.have.status(201));",
+									"pm.test('Response has contact data and reference number', function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    pm.expect(jsonData.data).to.have.property('contact_id');",
+									"    pm.expect(jsonData.data).to.have.property('reference_number');",
+									"    pm.expect(jsonData.data).to.have.property('message');",
+									"    pm.expect(jsonData.data.reference_number).to.match(/^CT\\d{6}$/);",
+									"});",
+									"",
+									"pm.test('Email notifications triggered', function () {",
+									"    const jsonData = pm.response.json();",
+									"    const refNumber = jsonData.data.reference_number;",
+									"    ",
+									"    console.log('📧 Contact Form Submitted Successfully!');",
+									"    console.log('🔢 Reference Number: ' + refNumber);",
+									"    console.log('');",
+									"    console.log('📨 EMAIL 1: Admin Notification');",
+									"    console.log('   To: irveloper@gmail.com');",
+									"    console.log('   Subject: \"New Contact Form Submission - Inquiry about airport transfers\"');",
+									"    console.log('   Contains: Full contact details, message, reference number');",
+									"    console.log('');",
+									"    console.log('🤖 EMAIL 2: Customer Auto-Reply');",
+									"    console.log('   To: sarah.traveler@example.com');",
+									"    console.log('   Subject: \"Thank you for contacting FiveStars Transport\"');",
+									"    console.log('   Contains: Professional auto-reply, services info, reference number');",
+									"    console.log('');",
+									"    console.log('📬 Check both email inboxes! (and spam folders)');",
+									"});",
+									"",
+									"// Store contact ID for other tests",
+									"const jsonData = pm.response.json();",
+									"if (jsonData.data && jsonData.data.contact_id) {",
+									"    pm.environment.set('test_contact_id', jsonData.data.contact_id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{"key": "Content-Type", "value": "application/json"},
+							{"key": "Accept", "value": "application/json"}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Sarah Traveler\",\n  \"email\": \"sarah.traveler@example.com\",\n  \"phone\": \"+1-555-TRAVEL\",\n  \"subject\": \"Inquiry about airport transfers\",\n  \"message\": \"Hi! My family and I are planning a vacation to Cancun in December. We'll be arriving at the airport on December 20th around 3 PM and need transportation to our hotel (Hyatt Ziva Cancun). We're a family of 4 (2 adults, 2 children aged 8 and 12) with 6 suitcases. Could you please provide a quote for round-trip transportation? Also, do you provide child car seats? Thank you!\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/contact",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "contact"]
+						}
+					}
+				},
+				{
+					"name": "📧 Contact Form - Business Inquiry (Test Different Subject)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Business inquiry submitted successfully', () => pm.response.to.have.status(201));",
+									"pm.test('Different subject generates different emails', function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    ",
+									"    console.log('📧 Business Contact Form Submitted!');",
+									"    console.log('🔢 Reference: ' + jsonData.data.reference_number);",
+									"    console.log('');",
+									"    console.log('📨 Admin Email Subject: \"New Contact Form Submission - Partnership Inquiry\"');",
+									"    console.log('🤖 Customer Auto-Reply: Same professional template');",
+									"    console.log('📬 Check emails for this business inquiry!');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{"key": "Content-Type", "value": "application/json"},
+							{"key": "Accept", "value": "application/json"}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Carlos Rodriguez\",\n  \"email\": \"carlos.hotel@example.com\",\n  \"phone\": \"+52-998-123-4567\",\n  \"subject\": \"Partnership Inquiry\",\n  \"message\": \"Hello, I represent Hotel Excellence Playa Mujeres and we're interested in establishing a partnership for guest transportation services. We have 300+ rooms and receive guests daily who need reliable airport transfers. Could we schedule a call to discuss volume rates and service agreements? Best regards, Carlos Rodriguez - Guest Services Manager\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/contact",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "contact"]
+						}
+					}
+				},
+				{
+					"name": "📋 Get All Contacts",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Contacts retrieved successfully', () => pm.response.to.have.status(200));",
+									"pm.test('Response has contacts data', function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    pm.expect(jsonData.data).to.be.an('array');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [{"key": "Accept", "value": "application/json"}],
+						"url": {
+							"raw": "{{base_url}}/api/v1/contacts",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "contacts"]
+						}
+					}
+				},
+				{
+					"name": "📊 Get Contact Statistics",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Contact stats retrieved successfully', () => pm.response.to.have.status(200));",
+									"pm.test('Response has stats data', function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    pm.expect(jsonData.data).to.have.property('total_contacts');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [{"key": "Accept", "value": "application/json"}],
+						"url": {
+							"raw": "{{base_url}}/api/v1/contacts/stats",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "contacts", "stats"]
+						}
+					}
+				},
+				{
+					"name": "🔍 Get Contact Details",
+					"request": {
+						"method": "GET",
+						"header": [{"key": "Accept", "value": "application/json"}],
+						"url": {
+							"raw": "{{base_url}}/api/v1/contacts/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "contacts", "1"]
+						}
+					}
+				},
+				{
+					"name": "✏️ Update Contact Status",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Contact status updated successfully', () => pm.response.to.have.status(200));",
+									"pm.test('Response shows updated status', function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{"key": "Content-Type", "value": "application/json"},
+							{"key": "Accept", "value": "application/json"}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": \"responded\",\n  \"notes\": \"Customer inquiry handled via email\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/contacts/1/status",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "contacts", "1", "status"]
+						}
+					}
+				},
+				{
+					"name": "🎉 Submit Group Quote Request (Auto-Sends 2 Emails!)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Group quote request submitted successfully', () => pm.response.to.have.status(201));",
+									"pm.test('Response has group quote data and reference number', function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    pm.expect(jsonData.data).to.have.property('contact_id');",
+									"    pm.expect(jsonData.data).to.have.property('reference_number');",
+									"    pm.expect(jsonData.data).to.have.property('message');",
+									"    pm.expect(jsonData.data.reference_number).to.match(/^GQ\\d{6}$/);",
+									"});",
+									"",
+									"pm.test('Group quote email notifications triggered', function () {",
+									"    const jsonData = pm.response.json();",
+									"    const refNumber = jsonData.data.reference_number;",
+									"    ",
+									"    console.log('🎉 Group Quote Request Submitted Successfully!');",
+									"    console.log('🔢 Reference Number: ' + refNumber);",
+									"    console.log('👥 Group Size: 25 passengers');",
+									"    console.log('📅 Event Date: December 15, 2025');",
+									"    console.log('🚌 Service Type: Wedding Transportation');",
+									"    console.log('');",
+									"    console.log('📨 EMAIL 1: Admin Notification (Priority Group Quote)');",
+									"    console.log('   To: irveloper@gmail.com');",
+									"    console.log('   Subject: \"New Group Quote Request - Wedding Transportation\"');",
+									"    console.log('   Contains: Group details, event info, contact data, reference number');",
+									"    console.log('   Priority: HIGH (Large group booking)');",
+									"    console.log('');",
+									"    console.log('🤖 EMAIL 2: Customer Auto-Reply');",
+									"    console.log('   To: wedding.planner@example.com');",
+									"    console.log('   Subject: \"Thank you for your Group Quote Request - FiveStars Transport\"');",
+									"    console.log('   Contains: Group quote summary, timeline, next steps, reference number');",
+									"    console.log('');",
+									"    console.log('⏰ Expected Response: Quote within 24 hours for groups');",
+									"    console.log('📞 Follow-up: Call within 2 hours for groups over 20 passengers');",
+									"    console.log('📬 Check both email inboxes! (and spam folders)');",
+									"});",
+									"",
+									"// Store group quote contact ID for other tests",
+									"const jsonData = pm.response.json();",
+									"if (jsonData.data && jsonData.data.contact_id) {",
+									"    pm.environment.set('test_group_quote_id', jsonData.data.contact_id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{"key": "Content-Type", "value": "application/json"},
+							{"key": "Accept", "value": "application/json"}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"contact_name\": \"Emily Wedding Planner\",\n  \"email\": \"wedding.planner@example.com\",\n  \"phone\": \"+1-555-WEDDING\",\n  \"group_size\": 25,\n  \"event_date\": \"2025-12-15\",\n  \"service_type\": \"Wedding Transportation\",\n  \"event_details\": \"Premium wedding transportation for 25 guests. Need round-trip service from Hilton Cancun All-Inclusive Resort to Dreams Vista Cancun Golf & Spa Resort for ceremony and reception. Wedding ceremony at 4 PM, reception until 11 PM. Require elegant, clean vehicles suitable for formal attire. Some elderly guests need easy access vehicles. Please include champagne service if available. Very important day - need reliable, punctual service with professional drivers.\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/contact/group-quote",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "contact", "group-quote"]
+						}
+					}
+				},
+				{
+					"name": "🏢 Corporate Group Quote Request (Large Group)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Corporate group quote submitted successfully', () => pm.response.to.have.status(201));",
+									"pm.test('Large group validation works', function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    ",
+									"    console.log('🏢 Corporate Group Quote Submitted!');",
+									"    console.log('🔢 Reference: ' + jsonData.data.reference_number);",
+									"    console.log('👥 Large Group: 50 passengers (max capacity test)');",
+									"    console.log('📋 Service: Corporate Event Transportation');",
+									"    console.log('📧 Check emails for this large corporate group request!');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{"key": "Content-Type", "value": "application/json"},
+							{"key": "Accept", "value": "application/json"}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"contact_name\": \"David Corporate Events\",\n  \"email\": \"david.events@techcorp.com\",\n  \"phone\": \"+1-555-CORP-123\",\n  \"group_size\": 50,\n  \"event_date\": \"2025-11-20\",\n  \"service_type\": \"Corporate Event Transportation\",\n  \"event_details\": \"Annual corporate retreat transportation for 50 employees. Need transportation from Cancun International Airport to Moon Palace Resort. Arriving on multiple flights between 2 PM - 6 PM. Require professional service with uniformed drivers. Some VIP executives need premium vehicles. All employees have business casual dress code. Need reliable coordination for staggered arrivals.\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/contact/group-quote",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "contact", "group-quote"]
+						}
+					}
+				},
+				{
+					"name": "❌ Group Quote - Validation Errors",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Validation errors returned correctly', () => pm.response.to.have.status(422));",
+									"pm.test('Response shows validation errors', function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.false;",
+									"    pm.expect(jsonData.message).to.include('Validation failed');",
+									"    pm.expect(jsonData.errors).to.be.an('object');",
+									"    ",
+									"    console.log('❌ Validation Test Results:');",
+									"    console.log('Event Date Error: ' + JSON.stringify(jsonData.errors.event_date));",
+									"    console.log('Group Size Error: ' + JSON.stringify(jsonData.errors.group_size));",
+									"    console.log('Email Error: ' + JSON.stringify(jsonData.errors.email));",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{"key": "Content-Type", "value": "application/json"},
+							{"key": "Accept", "value": "application/json"}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"contact_name\": \"A\",\n  \"email\": \"invalid-email\",\n  \"group_size\": 0,\n  \"event_date\": \"2024-01-01\",\n  \"service_type\": \"\",\n  \"event_details\": \"Too short\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/contact/group-quote",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "contact", "group-quote"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "🔧 Additional Payment Endpoints",
+			"item": [
+				{
+					"name": "💳 Create Payment Intent for Existing Booking",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Payment intent created for booking', () => pm.response.to.have.status(200));",
+									"pm.test('Response has payment intent data', function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    pm.expect(jsonData.data).to.have.property('client_secret');",
+									"    pm.expect(jsonData.data).to.have.property('payment_intent_id');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{"key": "Content-Type", "value": "application/json"},
+							{"key": "Accept", "value": "application/json"}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"currency\": \"USD\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/bookings/{{test_booking_id}}/payment-intent",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "bookings", "{{test_booking_id}}", "payment-intent"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "🛠️ Debug & Development Tools",
+			"item": [
+				{
+					"name": "🔍 Debug Service Mapping",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Debug service mapping works', () => pm.response.to.have.status(200));",
+									"pm.test('Response has debug data', function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    pm.expect(jsonData.debug).to.be.an('object');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{"key": "Content-Type", "value": "application/json"},
+							{"key": "Accept", "value": "application/json"}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"customerInfo\": {\n    \"firstName\": \"Debug\",\n    \"lastName\": \"Test\",\n    \"email\": \"debug@example.com\",\n    \"phone\": \"+1-555-DEBUG\",\n    \"country\": \"United States\"\n  },\n  \"pickupLocation\": \"Test Location\",\n  \"dropoffLocation\": \"Test Destination\",\n  \"pickupDateTime\": \"2025-12-25T10:00:00\",\n  \"passengers\": 2,\n  \"serviceName\": \"standard private\",\n  \"currency\": \"USD\",\n  \"totalPrice\": 100.00,\n  \"fromLocationId\": 1,\n  \"toLocationId\": 2,\n  \"fromLocationType\": \"airport\",\n  \"toLocationType\": \"location\",\n  \"tripType\": \"arrival\",\n  \"bookingDate\": \"2025-09-10T12:00:00\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/debug/service-mapping",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "debug", "service-mapping"]
+						}
+					}
+				},
+				{
+					"name": "📧 Test Email Functionality",
+					"item": [
+						{
+							"name": "📧 Test Booking Confirmation Email",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test('Email test successful', () => pm.response.to.have.status(200));",
+											"pm.test('Response confirms email sent', function () {",
+											"    const jsonData = pm.response.json();",
+											"    pm.expect(jsonData.success).to.be.true;",
+											"    pm.expect(jsonData.message).to.include('successfully');",
+											"    pm.expect(jsonData.email_sent_to).to.be.a('string');",
+											"    pm.expect(jsonData.email_type).to.equal('booking');",
+											"});",
+											"",
+											"pm.test('Check your email inbox', function () {",
+											"    const jsonData = pm.response.json();",
+											"    console.log('📬 Email sent to: ' + jsonData.email_sent_to);",
+											"    console.log('📧 Type: ' + jsonData.email_type);",
+											"    console.log('✅ Check your inbox (and spam folder) for the test email!');",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{"key": "Content-Type", "value": "application/json"},
+									{"key": "Accept", "value": "application/json"}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"email\": \"your-email@example.com\",\n  \"type\": \"booking\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/v1/debug/test-email",
+									"host": ["{{base_url}}"],
+									"path": ["api", "v1", "debug", "test-email"]
+								}
+							}
+						},
+						{
+							"name": "📧 Test Booking Email with Existing Booking",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test('Email test with existing booking successful', () => pm.response.to.have.status(200));",
+											"pm.test('Response confirms email sent', function () {",
+											"    const jsonData = pm.response.json();",
+											"    pm.expect(jsonData.success).to.be.true;",
+											"    pm.expect(jsonData.message).to.include('successfully');",
+											"    pm.expect(jsonData.email_sent_to).to.be.a('string');",
+											"    pm.expect(jsonData.email_type).to.equal('booking');",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{"key": "Content-Type", "value": "application/json"},
+									{"key": "Accept", "value": "application/json"}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"email\": \"your-email@example.com\",\n  \"type\": \"booking\",\n  \"booking_id\": \"{{test_booking_id}}\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/v1/debug/test-email",
+									"host": ["{{base_url}}"],
+									"path": ["api", "v1", "debug", "test-email"]
+								}
+							}
+						},
+						{
+							"name": "📞 Test Contact Auto-Reply Email",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test('Contact email test successful', () => pm.response.to.have.status(200));",
+											"pm.test('Response confirms contact email sent', function () {",
+											"    const jsonData = pm.response.json();",
+											"    pm.expect(jsonData.success).to.be.true;",
+											"    pm.expect(jsonData.message).to.include('Contact auto-reply');",
+											"    pm.expect(jsonData.email_sent_to).to.be.a('string');",
+											"    pm.expect(jsonData.email_type).to.equal('contact');",
+											"});",
+											"",
+											"pm.test('Check your email for auto-reply', function () {",
+											"    const jsonData = pm.response.json();",
+											"    console.log('📬 Contact auto-reply sent to: ' + jsonData.email_sent_to);",
+											"    console.log('🤖 This tests the contact form auto-reply email template');",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{"key": "Content-Type", "value": "application/json"},
+									{"key": "Accept", "value": "application/json"}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"email\": \"your-email@example.com\",\n  \"type\": \"contact\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/v1/debug/test-email",
+									"host": ["{{base_url}}"],
+									"path": ["api", "v1", "debug", "test-email"]
+								}
+							}
+						},
+						{
+							"name": "🔍 Email Template Preview",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test('Email preview generated successfully', () => pm.response.to.have.status(200));",
+											"pm.test('Response has preview content', function () {",
+											"    const jsonData = pm.response.json();",
+											"    pm.expect(jsonData.success).to.be.true;",
+											"    pm.expect(jsonData.template_type).to.equal('booking');",
+											"    pm.expect(jsonData).to.have.property('html_preview');",
+											"    pm.expect(jsonData.html_preview).to.be.a('string');",
+											"});",
+											"",
+											"pm.test('HTML preview contains content', function () {",
+											"    const jsonData = pm.response.json();",
+											"    pm.expect(jsonData.html_preview.length).to.be.above(100);",
+											"    console.log('📧 Email template preview generated successfully');",
+											"    console.log('📏 HTML content length: ' + jsonData.html_preview.length + ' characters');",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{"key": "Content-Type", "value": "application/json"},
+									{"key": "Accept", "value": "application/json"}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"type\": \"booking\",\n  \"format\": \"html\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/v1/debug/preview-email",
+									"host": ["{{base_url}}"],
+									"path": ["api", "v1", "debug", "preview-email"]
+								}
+							}
+						},
+						{
+							"name": "📊 Email System Status Dashboard",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test('Email system status retrieved', () => pm.response.to.have.status(200));",
+											"pm.test('Response has comprehensive system status', function () {",
+											"    const jsonData = pm.response.json();",
+											"    pm.expect(jsonData.success).to.be.true;",
+											"    pm.expect(jsonData).to.have.property('system_status');",
+											"    pm.expect(jsonData).to.have.property('mail_configuration');",
+											"    pm.expect(jsonData).to.have.property('email_templates');",
+											"    pm.expect(jsonData).to.have.property('database_status');",
+											"});",
+											"",
+											"pm.test('Mail configuration is present', function () {",
+											"    const jsonData = pm.response.json();",
+											"    const config = jsonData.mail_configuration;",
+											"    pm.expect(config).to.have.property('driver');",
+											"    pm.expect(config).to.have.property('sendgrid_configured');",
+											"    ",
+											"    console.log('📧 Mail Driver: ' + config.driver);",
+											"    console.log('🌐 SendGrid: ' + (config.sendgrid_configured ? '✅ Configured' : '❌ Not configured'));",
+											"    console.log('🔧 Queue Driver: ' + config.queue_driver);",
+											"});",
+											"",
+											"pm.test('Email templates status', function () {",
+											"    const jsonData = pm.response.json();",
+											"    const templates = jsonData.email_templates;",
+											"    ",
+											"    console.log('📄 Email Templates:');",
+											"    Object.keys(templates).forEach(template => {",
+											"        const status = templates[template];",
+											"        console.log(`  ${template}: HTML=${status.html} Text=${status.text} Class=${status.class}`);",
+											"    });",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{"key": "Accept", "value": "application/json"}
+								],
+								"url": {
+									"raw": "{{base_url}}/api/v1/debug/email-status",
+									"host": ["{{base_url}}"],
+									"path": ["api", "v1", "debug", "email-status"]
+								}
+							}
+						},
+						{
+							"name": "📮 Bulk Email Testing",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test('Bulk email test completed', () => pm.response.to.have.status(200));",
+											"pm.test('Response has bulk test results', function () {",
+											"    const jsonData = pm.response.json();",
+											"    pm.expect(jsonData).to.have.property('summary');",
+											"    pm.expect(jsonData).to.have.property('results');",
+											"    pm.expect(jsonData.results).to.be.an('array');",
+											"    pm.expect(jsonData.summary).to.have.property('total_emails');",
+											"    pm.expect(jsonData.summary).to.have.property('successful');",
+											"    pm.expect(jsonData.summary).to.have.property('failed');",
+											"    pm.expect(jsonData.summary).to.have.property('success_rate');",
+											"});",
+											"",
+											"pm.test('Display bulk test results', function () {",
+											"    const jsonData = pm.response.json();",
+											"    const summary = jsonData.summary;",
+											"    ",
+											"    console.log('📮 Bulk Email Test Results:');",
+											"    console.log(`📧 Total Emails: ${summary.total_emails}`);",
+											"    console.log(`✅ Successful: ${summary.successful}`);",
+											"    console.log(`❌ Failed: ${summary.failed}`);",
+											"    console.log(`📊 Success Rate: ${summary.success_rate}`);",
+											"    ",
+											"    jsonData.results.forEach(result => {",
+											"        const status = result.status === 'sent' ? '✅' : '❌';",
+											"        console.log(`${status} ${result.email}: ${result.message}`);",
+											"    });",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{"key": "Content-Type", "value": "application/json"},
+									{"key": "Accept", "value": "application/json"}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"emails\": [\n    \"test1@example.com\",\n    \"test2@example.com\",\n    \"test3@example.com\"\n  ],\n  \"type\": \"booking\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/v1/debug/bulk-test-email",
+									"host": ["{{base_url}}"],
+									"path": ["api", "v1", "debug", "bulk-test-email"]
+								}
+							}
+						},
+						{
+							"name": "❌ Test Email - Invalid Parameters",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test('Validation error for invalid email', () => pm.response.to.have.status(422));",
+											"pm.test('Response has validation errors', function () {",
+											"    const jsonData = pm.response.json();",
+											"    pm.expect(jsonData).to.have.property('errors');",
+											"    pm.expect(jsonData.errors).to.be.an('object');",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{"key": "Content-Type", "value": "application/json"},
+									{"key": "Accept", "value": "application/json"}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"email\": \"invalid-email-format\",\n  \"type\": \"invalid-type\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/v1/debug/test-email",
+									"host": ["{{base_url}}"],
+									"path": ["api", "v1", "debug", "test-email"]
+								}
+							}
+						}
+					]
 				}
 			]
 		}

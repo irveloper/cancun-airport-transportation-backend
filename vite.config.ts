@@ -8,7 +8,7 @@ export default defineConfig({
         host: '0.0.0.0',    // bind inside Docker to all interfaces
         port: 5173,
         strictPort: true,
-        cors: true,         // send Access-Control-Allow-Origin: *
+        cors: false,         // send Access-Control-Allow-Origin: *
         hmr: {
             host: '0.0.0.0',  // where the browser will connect for HMR
             protocol: 'ws',

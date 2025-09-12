@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreBookingRequest;
+use App\Http\Requests\UpdateBookingRequest;
 use App\Models\Booking;
 use App\Models\Customer;
 use App\Models\Rate;
@@ -59,22 +61,12 @@ class BookingController extends Controller
         ]);
     }
 
-    public function store(Request $request): JsonResponse
+    public function store(StoreBookingRequest $request): JsonResponse
     {
-        $validator = $this->validateBookingRequest($request);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Validation failed',
-                'errors' => $validator->errors()
-            ], 422);
-        }
-
         try {
             DB::beginTransaction();
 
-            $data = $validator->validated();
+            $data = $request->validated();
 
             $customer = Customer::findOrCreateFromBookingData($data['customerInfo']);
 
@@ -172,7 +164,7 @@ class BookingController extends Controller
         ]);
     }
 
-    public function update(Request $request, $identifier): JsonResponse
+    public function update(UpdateBookingRequest $request, $identifier): JsonResponse
     {
         $booking = $this->findBookingByIdentifier($identifier, false); // No relations needed for update
 
@@ -181,20 +173,6 @@ class BookingController extends Controller
                 'success' => false,
                 'message' => 'Booking not found with ID or booking number: ' . $identifier
             ], 404);
-        }
-
-        $validator = Validator::make($request->all(), [
-            'status' => 'sometimes|in:pending,confirmed,in_progress,completed,cancelled',
-            'cancellation_reason' => 'required_if:status,cancelled|string|max:500',
-            'special_requests' => 'sometimes|string|max:1000',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Validation failed',
-                'errors' => $validator->errors()
-            ], 422);
         }
 
         try {
@@ -293,77 +271,6 @@ class BookingController extends Controller
         return $booking;
     }
 
-    /**
-     * Normalize and preprocess booking request data from frontend
-     */
-    private function normalizeBookingRequest(Request $request): Request
-    {
-        $data = $request->all();
-
-        // Convert string IDs to integers first
-        if (isset($data['fromLocationId'])) {
-            $data['fromLocationId'] = (int)$data['fromLocationId'];
-        }
-        if (isset($data['toLocationId'])) {
-            $data['toLocationId'] = (int)$data['toLocationId'];
-        }
-        if (isset($data['serviceId'])) {
-            $data['serviceId'] = (int)$data['serviceId'];
-        }
-
-        // Map frontend service names to our valid service types
-        if (isset($data['serviceName'])) {
-            $originalServiceName = $data['serviceName'];
-            $data['serviceName'] = $this->mapServiceName($data['serviceName']);
-
-        }
-
-        // Fix pickupDateTime if incomplete
-        if (isset($data['pickupDateTime'])) {
-            $pickupDateTime = $data['pickupDateTime'];
-            // If it's just "2025-09-07T", add a default time
-            if (preg_match('/^\d{4}-\d{2}-\d{2}T$/', $pickupDateTime)) {
-                $data['pickupDateTime'] = $pickupDateTime . '12:00:00';
-            }
-            // Try to parse and validate the datetime
-            try {
-                $parsedDateTime = Carbon::parse($data['pickupDateTime']);
-                $data['pickupDateTime'] = $parsedDateTime->toISOString();
-            } catch (\Exception $e) {
-                // Leave as is, validation will catch it
-            }
-        }
-
-        // Fix bookingDate if incomplete
-        if (isset($data['bookingDate'])) {
-            $bookingDate = $data['bookingDate'];
-            // If it's just "2025-09-07T", add a default time
-            if (preg_match('/^\d{4}-\d{2}-\d{2}T$/', $bookingDate)) {
-                $data['bookingDate'] = $bookingDate . '12:00:00';
-            }
-            // Try to parse and validate the datetime
-            try {
-                $parsedDateTime = Carbon::parse($data['bookingDate']);
-                $data['bookingDate'] = $parsedDateTime->toISOString();
-            } catch (\Exception $e) {
-                // Leave as is, validation will catch it
-            }
-        }
-
-        // Normalize flight times
-        if (isset($data['arrivalFlightInfo']['time'])) {
-            $data['arrivalFlightInfo']['time'] = $this->normalizeFlightTime($data['arrivalFlightInfo']['time']);
-        }
-        if (isset($data['departureFlightInfo']['time'])) {
-            $data['departureFlightInfo']['time'] = $this->normalizeFlightTime($data['departureFlightInfo']['time']);
-        }
-
-        // Clone the original request and replace its data
-        $normalizedRequest = clone $request;
-        $normalizedRequest->replace($data);
-
-        return $normalizedRequest;
-    }
 
     /**
      * Map frontend service names to our database service types
@@ -458,49 +365,6 @@ class BookingController extends Controller
         }
     }
 
-    private function validateBookingRequest(Request $request): \Illuminate\Validation\Validator
-    {
-        return Validator::make($request->all(), [
-            'customerInfo' => 'required|array',
-            'customerInfo.firstName' => 'required|string|max:100',
-            'customerInfo.lastName' => 'nullable|string|max:100',
-            'customerInfo.email' => 'required|email|max:255',
-            'customerInfo.phone' => 'required|string|max:20',
-            'customerInfo.country' => 'required|string|max:100',
-
-            'pickupLocation' => 'required|string|max:255',
-            'dropoffLocation' => 'required|string|max:255',
-            'pickupDateTime' => 'required|string', // More flexible datetime validation
-            'passengers' => 'required|integer|min:1|max:50',
-            'serviceId' => 'nullable', // Allow string or integer
-            'serviceName' => 'required|string|max:100',
-            'currency' => 'required|string|size:3',
-            'totalPrice' => 'required|numeric|min:0',
-            'specialRequests' => 'nullable|string|max:1000',
-
-            'childSeats' => 'sometimes|integer|min:0|max:10',
-            'wheelchairAccessible' => 'sometimes|boolean',
-            'hotelReservationName' => 'nullable|string|max:255',
-            'fromLocationId' => 'required', // Allow string or integer
-            'toLocationId' => 'required', // Allow string or integer
-            'fromLocationType' => 'required|in:airport,location,zone',
-            'toLocationType' => 'required|in:airport,location,zone',
-            'tripType' => 'required|in:arrival,departure,round-trip,hotel-to-hotel',
-            'bookingDate' => 'required|date',
-
-            'arrivalFlightInfo' => 'nullable|array',
-            'arrivalFlightInfo.airline' => 'required_with:arrivalFlightInfo|string|max:100',
-            'arrivalFlightInfo.flightNumber' => 'required_with:arrivalFlightInfo|string|max:20',
-            'arrivalFlightInfo.date' => 'required_with:arrivalFlightInfo|date',
-            'arrivalFlightInfo.time' => 'required_with:arrivalFlightInfo|string', // More flexible time format
-
-            'departureFlightInfo' => 'nullable|array',
-            'departureFlightInfo.airline' => 'required_with:departureFlightInfo|string|max:100',
-            'departureFlightInfo.flightNumber' => 'required_with:departureFlightInfo|string|max:20',
-            'departureFlightInfo.date' => 'required_with:departureFlightInfo|date',
-            'departureFlightInfo.time' => 'required_with:departureFlightInfo|string', // More flexible time format
-        ]);
-    }
 
     private function validateRates(array $data, $serviceType = null): array
     {
@@ -560,7 +424,7 @@ class BookingController extends Controller
     /**
      * Debug endpoint to test service mapping and validation
      */
-    public function debugServiceMapping(Request $request): JsonResponse
+    public function debugServiceMapping(StoreBookingRequest $request): JsonResponse
     {
         $data = $request->all();
 
@@ -572,25 +436,17 @@ class BookingController extends Controller
             }),
         ];
 
-        // Test normalization
         try {
-            $normalizedRequest = $this->normalizeBookingRequest($request);
-            $normalizedData = $normalizedRequest->all();
-            $debug['normalized_data'] = $normalizedData;
-
             // Test service name mapping specifically
             if (isset($data['serviceName'])) {
-                $mappedServiceName = $normalizedData['serviceName'] ?? $data['serviceName'];
-
                 $debug['service_mapping'] = [
                     'original' => $data['serviceName'],
-                    'normalized' => $mappedServiceName,
                     'found_in_db' => null
                 ];
 
-                // Test database lookup using the normalized service name
-                $serviceType = ServiceType::where('code', $mappedServiceName)
-                                         ->orWhere('name', $mappedServiceName)
+                // Test database lookup using the service name
+                $serviceType = ServiceType::where('code', $data['serviceName'])
+                                         ->orWhere('name', $data['serviceName'])
                                          ->first();
 
                 if ($serviceType) {
@@ -602,20 +458,17 @@ class BookingController extends Controller
                 }
             }
 
-            // Test full validation
-            $validator = $this->validateBookingRequest($normalizedRequest);
+            // Test full validation (Form Request already validated the data)
             $debug['validation'] = [
-                'passes' => !$validator->fails(),
-                'errors' => $validator->fails() ? $validator->errors() : null
+                'passes' => true,
+                'errors' => null
             ];
 
-            if (!$validator->fails()) {
-                $validatedData = $validator->validated();
+            $validatedData = $request->validated();
 
-                // Test rate validation
-                $rateValidation = $this->validateRates($validatedData);
-                $debug['rate_validation'] = $rateValidation;
-            }
+            // Test rate validation
+            $rateValidation = $this->validateRates($validatedData);
+            $debug['rate_validation'] = $rateValidation;
 
         } catch (\Exception $e) {
             $debug['error'] = [
@@ -633,24 +486,12 @@ class BookingController extends Controller
     /**
      * Create a new booking with payment intent in one call
      */
-    public function createWithPayment(Request $request): JsonResponse
+    public function createWithPayment(StoreBookingRequest $request): JsonResponse
     {
         try {
-            // Preprocess and normalize the request data
-            $normalizedRequest = $this->normalizeBookingRequest($request);
 
-            // Validate the booking data (reuse existing validation)
-            $validator = $this->validateBookingRequest($normalizedRequest);
-            if ($validator->fails()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Validation failed',
-                    'errors' => $validator->errors()
-                ], 422);
-            }
-
-            // Validate additional payment-specific fields using normalized request
-            $paymentValidator = Validator::make($normalizedRequest->all(), [
+            // Validate additional payment-specific fields
+            $paymentValidator = Validator::make($request->validated(), [
                 'currency' => 'required|string|size:3|in:USD,EUR,GBP,MXN,CAD',
             ]);
 
@@ -662,7 +503,7 @@ class BookingController extends Controller
                 ], 422);
             }
 
-            $data = $validator->validated();
+            $data = $request->validated();
             $currency = $paymentValidator->validated()['currency'];
 
             // Resolve service and vehicle types

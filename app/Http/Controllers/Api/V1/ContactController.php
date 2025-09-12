@@ -13,6 +13,89 @@ use Illuminate\Support\Facades\RateLimiter;
 class ContactController extends BaseApiController
 {
     /**
+     * Submit a group quote request
+     */
+    public function storeGroupQuote(Request $request): JsonResponse
+    {
+        // Rate limiting: max 5 group quote requests per hour per IP
+        $key = 'group-quote:' . $request->ip();
+        if (RateLimiter::tooManyAttempts($key, 5)) {
+            return $this->errorResponse('Too many group quote requests. Please try again later.', 429);
+        }
+
+        // Validation
+        $validator = Validator::make($request->all(), [
+            'contact_name' => 'required|string|max:100|min:2',
+            'email' => 'required|email|max:255',
+            'phone' => 'nullable|string|max:20',
+            'group_size' => 'required|integer|min:1|max:500',
+            'event_date' => 'required|date|after:today',
+            'service_type' => 'required|string|max:100',
+            'event_details' => 'required|string|max:2000|min:10',
+        ]);
+
+        if ($validator->fails()) {
+            return $this->validationErrorResponse($validator->errors());
+        }
+
+        try {
+            $data = $validator->validated();
+
+            // Add metadata
+            $metadata = [
+                'user_agent' => $request->userAgent(),
+                'referrer' => $request->header('referer'),
+                'timestamp' => now()->toISOString(),
+                'request_type' => 'group_quote'
+            ];
+
+            // Create contact record with group-specific data
+            $contact = Contact::create([
+                'name' => $data['contact_name'],
+                'email' => $data['email'],
+                'phone' => $data['phone'],
+                'subject' => 'Group Quote Request - ' . $data['service_type'],
+                'message' => $this->formatGroupQuoteMessage($data),
+                'source' => 'website_group_quote',
+                'metadata' => $metadata,
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+                'status' => 'new',
+            ]);
+
+            // Increment rate limiter
+            RateLimiter::hit($key, 3600); // 1 hour
+
+            Log::info('Group quote request submitted', [
+                'contact_id' => $contact->id,
+                'email' => $contact->email,
+                'group_size' => $data['group_size'],
+                'event_date' => $data['event_date'],
+                'service_type' => $data['service_type'],
+                'ip' => $request->ip()
+            ]);
+
+            // Send email notifications
+            $this->sendGroupQuoteNotifications($contact, $data);
+
+            return $this->successResponse([
+                'message' => 'Thank you for your group quote request! We\'ll get back to you within 24 hours with a detailed quote.',
+                'contact_id' => $contact->id,
+                'reference_number' => 'GQ' . str_pad($contact->id, 6, '0', STR_PAD_LEFT)
+            ], 'Group quote request submitted successfully', 201);
+
+        } catch (\Exception $e) {
+            Log::error('Group quote request submission failed', [
+                'error' => $e->getMessage(),
+                'data' => $request->all(),
+                'ip' => $request->ip()
+            ]);
+
+            return $this->errorResponse('Failed to submit group quote request. Please try again.', 500);
+        }
+    }
+
+    /**
      * Submit a new contact form
      */
     public function store(Request $request): JsonResponse
@@ -245,33 +328,177 @@ class ContactController extends BaseApiController
      */
     private function sendNotifications(Contact $contact): void
     {
+        $adminEmailSent = false;
+        $customerEmailSent = false;
+        
         try {
-            // Get admin email from config
-            $adminEmail = config('services.sendgrid.from_email'); // Use SendGrid email for now
+            // Get admin email from environment variable
+            $adminEmail = env('ADMIN_EMAIL', config('services.sendgrid.from_email'));
             
-            // Send notification to admin (queued)
+            // Send notification to admin
             if ($adminEmail) {
-                Mail::to($adminEmail)->send(new \App\Mail\ContactFormSubmitted($contact));
+                try {
+                    Mail::to($adminEmail)->send(new \App\Mail\ContactFormSubmitted($contact));
+                    $adminEmailSent = true;
+                    
+                    Log::info('✅ Contact form admin notification email sent successfully', [
+                        'contact_id' => $contact->id,
+                        'admin_email' => $adminEmail,
+                        'subject' => $contact->subject,
+                        'reference_number' => 'CT' . str_pad($contact->id, 6, '0', STR_PAD_LEFT),
+                        'status' => 'sent'
+                    ]);
+                } catch (\Exception $e) {
+                    Log::error('❌ Failed to send contact form admin notification email', [
+                        'contact_id' => $contact->id,
+                        'admin_email' => $adminEmail,
+                        'error' => $e->getMessage(),
+                        'status' => 'failed'
+                    ]);
+                }
+            }
+            
+            // Send auto-reply to customer
+            try {
+                Mail::to($contact->email)->send(new \App\Mail\ContactAutoReply($contact));
+                $customerEmailSent = true;
                 
-                Log::info('Admin notification email queued', [
+                Log::info('✅ Contact form customer auto-reply email sent successfully', [
                     'contact_id' => $contact->id,
-                    'admin_email' => $adminEmail
+                    'customer_email' => $contact->email,
+                    'subject' => $contact->subject,
+                    'reference_number' => 'CT' . str_pad($contact->id, 6, '0', STR_PAD_LEFT),
+                    'status' => 'sent'
+                ]);
+            } catch (\Exception $e) {
+                Log::error('❌ Failed to send contact form customer auto-reply email', [
+                    'contact_id' => $contact->id,
+                    'customer_email' => $contact->email,
+                    'error' => $e->getMessage(),
+                    'status' => 'failed'
                 ]);
             }
             
-            // Send auto-reply to customer (queued)
-            Mail::to($contact->email)->send(new \App\Mail\ContactAutoReply($contact));
-            
-            Log::info('Customer auto-reply email queued', [
+            // Summary log
+            Log::info('📧 Contact form email notification summary', [
                 'contact_id' => $contact->id,
-                'customer_email' => $contact->email
+                'reference_number' => 'CT' . str_pad($contact->id, 6, '0', STR_PAD_LEFT),
+                'admin_email_sent' => $adminEmailSent,
+                'customer_email_sent' => $customerEmailSent,
+                'total_emails_sent' => ($adminEmailSent ? 1 : 0) + ($customerEmailSent ? 1 : 0),
+                'subject' => $contact->subject
             ]);
             
         } catch (\Exception $e) {
-            Log::warning('Failed to send contact notifications', [
+            Log::error('💥 Critical failure in contact form notification system', [
                 'contact_id' => $contact->id,
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
+                'admin_email_sent' => $adminEmailSent,
+                'customer_email_sent' => $customerEmailSent
+            ]);
+        }
+    }
+
+    /**
+     * Format group quote data into a readable message
+     */
+    private function formatGroupQuoteMessage(array $data): string
+    {
+        return sprintf(
+            "GROUP QUOTE REQUEST\n\n" .
+            "Contact: %s\n" .
+            "Email: %s\n" .
+            "Phone: %s\n" .
+            "Group Size: %d passengers\n" .
+            "Event Date: %s\n" .
+            "Service Type: %s\n\n" .
+            "Event Details:\n%s",
+            $data['contact_name'],
+            $data['email'],
+            $data['phone'] ?? 'Not provided',
+            $data['group_size'],
+            $data['event_date'],
+            $data['service_type'],
+            $data['event_details']
+        );
+    }
+
+    /**
+     * Send email notifications for group quote requests
+     */
+    private function sendGroupQuoteNotifications(Contact $contact, array $data): void
+    {
+        $adminEmailSent = false;
+        $customerEmailSent = false;
+        
+        try {
+            // Get admin email from environment variable
+            $adminEmail = env('ADMIN_EMAIL', config('services.sendgrid.from_email'));
+            
+            // Send notification to admin
+            if ($adminEmail) {
+                try {
+                    Mail::to($adminEmail)->send(new \App\Mail\GroupQuoteSubmitted($contact, $data));
+                    $adminEmailSent = true;
+                    
+                    Log::info('✅ Group quote admin notification email sent successfully', [
+                        'contact_id' => $contact->id,
+                        'admin_email' => $adminEmail,
+                        'group_size' => $data['group_size'],
+                        'event_date' => $data['event_date'],
+                        'reference_number' => 'GQ' . str_pad($contact->id, 6, '0', STR_PAD_LEFT),
+                        'status' => 'sent'
+                    ]);
+                } catch (\Exception $e) {
+                    Log::error('❌ Failed to send group quote admin notification email', [
+                        'contact_id' => $contact->id,
+                        'admin_email' => $adminEmail,
+                        'error' => $e->getMessage(),
+                        'status' => 'failed'
+                    ]);
+                }
+            }
+            
+            // Send auto-reply to customer
+            try {
+                Mail::to($contact->email)->send(new \App\Mail\GroupQuoteAutoReply($contact, $data));
+                $customerEmailSent = true;
+                
+                Log::info('✅ Group quote customer auto-reply email sent successfully', [
+                    'contact_id' => $contact->id,
+                    'customer_email' => $contact->email,
+                    'group_size' => $data['group_size'],
+                    'reference_number' => 'GQ' . str_pad($contact->id, 6, '0', STR_PAD_LEFT),
+                    'status' => 'sent'
+                ]);
+            } catch (\Exception $e) {
+                Log::error('❌ Failed to send group quote customer auto-reply email', [
+                    'contact_id' => $contact->id,
+                    'customer_email' => $contact->email,
+                    'error' => $e->getMessage(),
+                    'status' => 'failed'
+                ]);
+            }
+            
+            // Summary log
+            Log::info('📧 Group quote email notification summary', [
+                'contact_id' => $contact->id,
+                'reference_number' => 'GQ' . str_pad($contact->id, 6, '0', STR_PAD_LEFT),
+                'admin_email_sent' => $adminEmailSent,
+                'customer_email_sent' => $customerEmailSent,
+                'total_emails_sent' => ($adminEmailSent ? 1 : 0) + ($customerEmailSent ? 1 : 0),
+                'group_size' => $data['group_size'],
+                'service_type' => $data['service_type']
+            ]);
+            
+        } catch (\Exception $e) {
+            Log::error('💥 Critical failure in group quote notification system', [
+                'contact_id' => $contact->id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'admin_email_sent' => $adminEmailSent,
+                'customer_email_sent' => $customerEmailSent
             ]);
         }
     }
