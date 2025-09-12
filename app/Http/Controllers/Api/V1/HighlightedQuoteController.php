@@ -245,19 +245,19 @@ class HighlightedQuoteController extends BaseApiController
         if ($fromLocation->type === 'A' && $toLocation->type !== 'A') {
             return 'Airport Transfer';
         }
-        
+
         if ($fromLocation->type !== 'A' && $toLocation->type === 'A') {
             return 'Airport Transfer';
         }
-        
+
         if ($fromLocation->type === 'A' && $toLocation->type === 'A') {
             return 'Airport Transfer';
         }
-        
+
         if ($fromLocation->type === 'H' && $toLocation->type === 'H') {
             return 'Hotel Transfer';
         }
-        
+
         return 'Private Transfer';
     }
 
@@ -294,7 +294,7 @@ class HighlightedQuoteController extends BaseApiController
                         'id' => 1,
                         'name' => 'Chevrolet Suburban',
                         'code' => 'SUV',
-                        'image' => '/images/vehicles/suburban.jpg',
+                        'image' => 'https://res.cloudinary.com/codepom-mvp/image/upload/v1757428489/five-stars/services/luxury_j4wmyt.webp',
                         'max_pax' => 8,
                         'max_units' => 4,
                         'travel_time' => '30-45 minutes',
@@ -361,7 +361,7 @@ class HighlightedQuoteController extends BaseApiController
                         'id' => 2,
                         'name' => 'Ford Transit',
                         'code' => 'VAN',
-                        'image' => '/images/vehicles/transit.jpg',
+                        'image' => 'https://res.cloudinary.com/codepom-mvp/image/upload/v1757428489/five-stars/services/crafter_c2mvxn.webp',
                         'max_pax' => 8,
                         'max_units' => 4,
                         'travel_time' => '15-30 minutes',
@@ -428,7 +428,7 @@ class HighlightedQuoteController extends BaseApiController
                         'id' => 3,
                         'name' => 'Cadillac Escalade',
                         'code' => 'LUX',
-                        'image' => '/images/vehicles/escalade.jpg',
+                        'image' => 'https://res.cloudinary.com/codepom-mvp/image/upload/v1757428489/five-stars/services/economic_yjkomz.webp',
                         'max_pax' => 6,
                         'max_units' => 3,
                         'travel_time' => '30-45 minutes',

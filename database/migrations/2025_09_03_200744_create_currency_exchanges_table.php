@@ -16,8 +16,8 @@ return new class extends Migration
             $table->string('from_currency', 3);
             $table->string('to_currency', 3);
             $table->decimal('exchange_rate', 10, 6);
-            $table->timestamp('updated_at');
-            $table->timestamp('created_at');
+            $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();
+            $table->timestamp('created_at')->useCurrent();
             
             $table->unique(['from_currency', 'to_currency']);
         });
